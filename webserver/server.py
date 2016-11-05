@@ -29,7 +29,7 @@ app = Flask(__name__, template_folder=tmpl_dir)
 # However for the project you will need to connect to your Part 2 database in order to use the
 # data
 #
-# XXX: The URI should be in the format of: 
+# XXX: The URI should be in the format of:
 #
 #     postgresql://USER:PASSWORD@<IP_OF_POSTGRE_SQL_SERVER>/postgres
 #
@@ -38,7 +38,7 @@ app = Flask(__name__, template_folder=tmpl_dir)
 #     DATABASEURI = "postgresql://ewu2493:foobar@<IP_OF_POSTGRE_SQL_SERVER>/postgres"
 #
 # Swap out the URI below with the URI for the database created in part 2
-DATABASEURI = "sqlite:///test.db"
+DATABASEURI = "sqlite:///bsl2127:28fah@104.196.175.120"
 
 
 #
@@ -52,14 +52,14 @@ engine = create_engine(DATABASEURI)
 #
 # after these statements run, you should see a file test.db in your webserver/ directory
 # this is a sqlite database that you can query like psql typing in the shell command line:
-# 
+#
 #     sqlite3 test.db
 #
 # The following sqlite3 commands may be useful:
-# 
+#
 #     .tables               -- will list the tables in the database
 #     .schema <tablename>   -- print CREATE TABLE statement for table
-# 
+#
 # The setup code should be deleted once you switch to using the Part 2 postgresql database
 #
 engine.execute("""DROP TABLE IF EXISTS test;""")
@@ -77,7 +77,7 @@ engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'
 @app.before_request
 def before_request():
   """
-  This function is run at the beginning of every web request 
+  This function is run at the beginning of every web request
   (every time you enter an address in the web browser).
   We use it to setup a database connection that can be used throughout the request
 
@@ -111,7 +111,7 @@ def teardown_request(exception):
 #       @app.route("/foobar/", methods=["POST", "GET"])
 #
 # PROTIP: (the trailing / in the path is important)
-# 
+#
 # see for routing: http://flask.pocoo.org/docs/0.10/quickstart/#routing
 # see for decorators: http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/
 #
@@ -149,14 +149,14 @@ def index():
   # You can see an example template in templates/index.html
   #
   # context are the variables that are passed to the template.
-  # for example, "data" key in the context variable defined below will be 
+  # for example, "data" key in the context variable defined below will be
   # accessible as a variable in index.html:
   #
   #     # will print: [u'grace hopper', u'alan turing', u'ada lovelace']
   #     <div>{{data}}</div>
-  #     
+  #
   #     # creates a <div> tag for each element in data
-  #     # will print: 
+  #     # will print:
   #     #
   #     #   <div>grace hopper</div>
   #     #   <div>alan turing</div>
@@ -177,7 +177,7 @@ def index():
 
 #
 # This is an example of a different path.  You can see it at
-# 
+#
 #     localhost:8111/another
 #
 # notice that the functio name is another() rather than index()
