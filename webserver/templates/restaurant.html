@@ -1,42 +1,53 @@
 <html>
-  <style>
-    body{
-      font-size: 15pt;
-      font-family: arial;
-    }
-  </style>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+
+  <link href="http://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+  <link href="http://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.0.js"></script>
+
+  <link rel="stylesheet" type="text/css" media="all" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="style.css">
+
+</head>
   <body>
-    <h1> {{name}}   -  {{neighborhood}}({{zipcode}})</h1>
-    <h3> Price: {{price}}, Cuisine: {{cuisine}}, Phone number: {{contact}} </h3>
+    <div class=“container-fluid”>
+      <h1> {{name}}   -  {{neighborhood}}({{zipcode}})</h1>
+      <h3> Price: {{price}}, Cuisine: {{cuisine}}, Phone number: {{contact}} </h3>
 
-    {% if liked is not none %}
+      {% if liked is not none %}
 
-    {{liked}}% of foodies liked it <br>
-    <form method = "POST" action = "/foodie_review" >
-      <select name = "review">
-          {% for foodie,review_id in foodies %}
-            <option value= "{{review_id}}" >{{foodie}}</option>
-          {% endfor %}
-      </select>
-      <input type="submit" value = "submit">
-    </form>
-    {% else %}
-    No foodie ratings
-    {% endif %}
-    <br>
-    {% if rate is not none %}
-    Critics gave it an average rating of {{rate}}/5.0
-    <form method = "POST" action = "/critic_report" >
-      <select name = "report">
-          {% for critic,report in critic %}
-            <option value= "{{report}}" >{{critic}}</option>
-          {% endfor %}
-      </select>
-      <input type="submit" value = "submit">
-    </form>
-    {% else %}
-      No critic ratings
-    {% endif %}
+      {{liked}}% of foodies liked it <br>
+      <form method = "POST" action = "/foodie_review" >
+        <select name = "review">
+            {% for foodie,review_id in foodies %}
+              <option value= "{{review_id}}" >{{foodie}}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value = "submit">
+      </form>
+      {% else %}
+      No foodie ratings
+      {% endif %}
+      <br>
+      {% if rate is not none %}
+      Critics gave it an average rating of {{rate}}/5.0
+      <form method = "POST" action = "/critic_report" >
+        <select name = "report">
+            {% for critic,report in critic %}
+              <option value= "{{report}}" >{{critic}}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" value = "submit">
+      </form>
+      {% else %}
+        No critic ratings
+      {% endif %}
+    </div>
   </body>
 
 
