@@ -1,0 +1,51 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+  <body>
+
+    Select a Neighborhood
+    <form method = "POST" action = "/nearby" >
+      <select name = "neighbor">
+          {% for n in neighborhoods %}
+            <option value= "{{n}}" >{{n}}</option>
+          {% endfor %}
+      </select>
+      <input type="submit" value = "submit">
+    </form>
+
+    or
+
+    Select a Price Range
+    <form method = "POST" action = "/pricerange" >
+      <select name = "price">
+          <option value=1 >$</option>
+          <option value=2 >$$</option>
+          <option value=3 >$$$</option>
+      </select>
+      <input type="submit" value = "submit">
+    </form>
+
+    or
+
+    Select a Cuisine
+    <form method = "POST" action = "/cuisines" >
+      <select name = "cuisine">
+          {% for c in cuisines %}
+            <option value= "{{c}}" >{{c}}</option>
+          {% endfor %}
+      </select>
+      <input type="submit" value = "submit">
+    </form>
+
+
+
+  </body>
+
+
+</html>

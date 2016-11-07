@@ -1,0 +1,32 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+
+
+<body>
+  <table>
+    <tr>
+      <td>
+        <form method = "POST" action = "/critic_profile" >
+          <input type="submit" value = {{uid}} name = uid>'s {{name}}
+        </form>
+      </td>
+      <td>
+        <form method = "POST" action = "/restaurant" >
+          <input type="submit" value = "{{rid}}" name = rid> review
+        </form>
+      </td>
+    </tr>
+  <table>
+
+  {{rating}}/5.0 <br>
+  <b> Review </b> <br>
+  {{content}}
+</body>
+
+
+</html>

@@ -1,0 +1,41 @@
+<html>
+  <style>
+    body{
+      font-size: 15pt;
+      font-family: arial;
+    }
+  </style>
+  <body>
+    <h1> {{critic_id}}</h1>
+
+    {% if liked is not none %}
+
+    {{liked}}% of foodies liked this critic <br>
+    <form method = "POST" action = "/foodie_review_critic" >
+      <select name = "review">
+          {% for foodie in foodie_id %}
+            <option value= "{{critic_id}},{{foodie}}" >{{foodie}}</option>
+          {% endfor %}
+      </select>
+      <input type="submit" value = "submit">
+    </form>
+
+    {% else %}
+    No foodie ratings
+    {% endif %}
+
+    <br>
+    Reviews that {{critic_id}} wrote
+    <form method = "POST" action = "/critic_report" >
+      <select name = "report">
+          {% for restaurant,report in restaurant %}
+            <option value= "{{report}}" >{{restaurant}}</option>
+          {% endfor %}
+      </select>
+      <input type="submit" value = "submit">
+    </form>
+
+  </body>
+
+
+</html>
