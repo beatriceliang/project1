@@ -15,19 +15,13 @@
 
   </head>
 
+  <body>
+    <div class=“container-fluid”>
+      <div><a href="/categories">Check out restaurants</a></div>
 
-
-<body>
-  <div class=“container-fluid”>
-    <form method = "POST" action = "/landing">
-      <input type = "submit" value = "foodies0" name = uid>
-    </form>
-    <form method = "POST" action = "/landing">
-      <input type = "submit" value = "foodCritics16" name = uid>
-    </form
-  </div>
-
-</body>
-
-
+      {% if is_foodie == True %}
+      <div><a href="/recommendation"> Get a recommendation</a></div>
+      {% endif %}
+    </div>
+  </body>
 </html>

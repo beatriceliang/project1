@@ -207,7 +207,7 @@ def login():
 @app.route('/categories')
 def categories():
     cursor = g.conn.execute("SELECT DISTINCT neighborhood FROM restaurant_is_at")
-    #cursor = g.conn.execute("SELECT name FROM test")
+
     neighborhoods = []
     for result in cursor:
         neighborhoods.append(result['neighborhood'])  # can also be accessed using result[0]
@@ -219,10 +219,6 @@ def categories():
         cuisines.append(result['cuisine'])
     cursor.close()
     context = dict(neighborhoods = neighborhoods, cuisines = cuisines)
-
-
-    #context  = dict(neighborhood = neighborhood, restaurants = restaurants);
-
 
     return render_template("categories.html",**context)
 
@@ -454,6 +450,17 @@ def foodie_review_critic():
     context = dict(like = like, content = content)
     return render_template("foodie_review.html",**context)
 
+@app.route('/landing', methods=['POST'])
+def landing():
+    print request.form
+    uid = request.form["uid"]
+    cmd = 'SELECT is_foodie FROM users WHERE uid = (:u)'
+    cursor = g.conn.execute(text(cmd), u = uid)
+    for result in cursor:
+        is_foodie = result["is_foodie"]
+    context = dict(is_foodie = is_foodie)
+    print is_foodie
+    return render_template("landing.html", **context)
 
 if __name__ == "__main__":
   import click
