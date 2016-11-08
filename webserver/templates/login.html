@@ -16,6 +16,38 @@
 		.container-fluid {
 			padding: 80px 120px;
 		}
+		* {
+			box-sizing: border-box;
+		}
+
+		*:focus {
+			outline: none;
+		}
+		body {
+			font-family: Arial;
+			background-color: #3498DB;
+			padding: 50px;
+		}
+		.login {
+			margin: 20px auto;
+			width: 300px;
+		}
+		.login-screen {
+			background-color: #FFF;
+			padding: 20px;
+			border-radius: 5px
+		}
+
+		.app-title {
+			text-align: center;
+			color: #777;
+		}
+		.login-link {
+			font-size: 12px;
+			color: #444;
+			display: block;
+			margin-top: 12px;
+		}
 
 
 	</style>
@@ -24,13 +56,37 @@
 
 
 <body>
+	{% block body %}
+	{% if session['username'] %}
+	<p>You're logged in already!</p>
+	{% else %}
+
 	<div class="container-fluid">
 		<form action="" method="POST">
-			<input type="text" placeholder="Username" name="username">
-			<input type="password" placeholder="Password" name="password">
-			<input class="btn btn-default" type="submit" value="Login">
+			<div class="login">
+				<div class="login-screen">
+					<div class="app-title">
+						<h1>Login</h1>
+					</div>
+
+					<div class="login-form">
+						<div >
+							<input type="text" class="form-control" placeholder="Username" name="username">
+							<br>
+						</div>
+
+						<input type="submit" value="Log in" class="btn btn-default btn-primary btn-block">
+						<br>
+						<a href="/register" class="btn btn-default btn-primary btn-block" role="button">Register</a>
+						<br>
+					</div>
+				</div>
+			</div>
 		</form>
 	</div>
+
+	{% endif %}
+	{% endblock %}
 
 </body>
 
