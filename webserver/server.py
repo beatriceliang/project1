@@ -18,7 +18,7 @@ Read about it online.
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response, session, url_for
+from flask import Flask, request, render_template, g, redirect, Response, session, url_for, flash
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
 img = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'img')
@@ -244,8 +244,10 @@ def login():
       break
     if existing_user:
       session['username'] = request.form['username']
+      flash("You were successfully logged in...")
       print("redirect")
       return redirect('/')
+    flash("No matched username. Please register...")
   return render_template("login.html")
 
 
