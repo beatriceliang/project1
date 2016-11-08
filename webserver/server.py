@@ -18,10 +18,13 @@ Read about it online.
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response
+from flask import Flask, request, render_template, g, redirect, Response, session, url_for
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-app = Flask(__name__, template_folder=tmpl_dir)
+img = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'img')
+app = Flask(__name__, static_folder = img, template_folder=tmpl_dir)
+app.secret_key = os.urandom(24)
+
 
 
 #
@@ -45,6 +48,7 @@ DATABASEURI = "postgresql://bsl2127:28fah@104.196.175.120/postgres"
 # This line creates a database engine that knows how to connect to the URI above
 #
 engine = create_engine(DATABASEURI)
+
 
 
 #
@@ -90,6 +94,19 @@ def before_request():
     import traceback; traceback.print_exc()
     g.conn = None
 
+
+
+def is_foodie(uname):
+  queryStr = 'SELECT is_foodie FROM users WHERE uid=:u'
+  cursor = g.conn.execute(text(queryStr),u = uname)
+  for r in cursor:
+      identity = r[0]
+      break
+  if identity:
+    return True
+  else:
+    return False
+
 @app.teardown_request
 def teardown_request(exception):
   """
@@ -100,6 +117,17 @@ def teardown_request(exception):
     g.conn.close()
   except Exception as e:
     pass
+
+
+@app.route('/')
+def index():
+  if 'username' in session:
+    if is_foodie(session.get('username')):
+      return redirect(url_for('foodie'))
+    elif is_foodie(session.get('username')):
+      return redirect(url_for('foodCritic'))
+  else:
+    return redirect('login')
 
 
 #
@@ -115,8 +143,8 @@ def teardown_request(exception):
 # see for routing: http://flask.pocoo.org/docs/0.10/quickstart/#routing
 # see for decorators: http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/
 #
-@app.route('/')
-def index():
+@app.route('/register')
+def register():
   """
   request is a special object that Flask provides to access web request information:
 
@@ -134,11 +162,12 @@ def index():
   #
   # example of a database query
   #
-  # cursor = g.conn.execute("SELECT name FROM test")
-  # names = []
-  # for result in cursor:
-  #   names.append(result['name'])  # can also be accessed using result[0]
-  # cursor.close()
+  #cursor = g.conn.execute("SELECT name FROM test")
+  #names = []
+  #for result in cursor:
+    #names.append(result['name'])  # can also be accessed using result[0]
+  #cursor.close()
+
 
   #
   # Flask uses Jinja templates, which is an extension to HTML where you can
@@ -173,19 +202,23 @@ def index():
   # render_template looks in the templates/ folder for files.
   # for example, the below file reads template/index.html
   #
-  return render_template("index.html")#, **context)
+  #return render_template("index.html", **context)
+  return render_template("register.html")
 
-#
-# This is an example of a different path.  You can see it at
-#
-#     localhost:8111/another
-#
-# notice that the functio name is another() rather than index()
-# the functions for each app.route needs to have different names
-#
-@app.route('/another')
-def another():
-  return render_template("anotherfile.html")
+
+@app.route('/foodie')
+def foodie():
+  if 'username' in session:
+    return render_template("foodie.html")
+  else:
+    return redirect(url_for('login'))
+
+@app.route('/foodCritic')
+def foodCritic():
+  if 'username' in session:
+    return render_template("foodCritic.html")
+  else:
+    return redirect(url_for('login'))
 
 
 # Example of adding new data to the database
@@ -198,10 +231,30 @@ def add():
   return redirect('/')
 
 
-@app.route('/login')
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    abort(401)
-    this_is_never_executed()
+  if request.method == "POST":
+    uname = request.form['username']
+    print(uname)
+    queryStr = 'SELECT EXISTS (SELECT uid FROM users WHERE uid=:u)'
+    cursor = g.conn.execute(text(queryStr),u = uname)
+    for r in cursor:
+      existing_user = r[0]
+      break
+    if existing_user:
+      session['username'] = request.form['username']
+      print("redirect")
+      return redirect('/')
+  return render_template("login.html")
+
+
+@app.route("/logout")
+def logout():
+    session.pop('username', None)
+    return index()
+
+
 
 ################### MY FUNCTIONS ########################
 @app.route('/categories')
@@ -222,7 +275,7 @@ def categories():
 
     return render_template("categories.html",**context)
 
-@app.route('/nearby', methods=['POST'])
+@app.route('/nearby', methods=['GET'])
 def nearby():
     neighborhood = request.form["neighbor"]
     cmd = 'SELECT name, restaurant.rid AS rid\
@@ -469,7 +522,7 @@ if __name__ == "__main__":
   @click.option('--debug', is_flag=True)
   @click.option('--threaded', is_flag=True)
   @click.argument('HOST', default='0.0.0.0')
-  @click.argument('PORT', default=8111, type=int)
+  @click.argument('PORT', default=8112, type=int)
   def run(debug, threaded, host, port):
     """
     This function handles command line parameters.
