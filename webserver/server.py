@@ -18,10 +18,13 @@ Read about it online.
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response
+from flask import Flask, request, render_template, g, redirect, Response, session, url_for
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
-app = Flask(__name__, template_folder=tmpl_dir)
+img = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'img')
+app = Flask(__name__, static_folder = img, template_folder=tmpl_dir)
+
+
 
 
 #
@@ -38,7 +41,7 @@ app = Flask(__name__, template_folder=tmpl_dir)
 #     DATABASEURI = "postgresql://ewu2493:foobar@<IP_OF_POSTGRE_SQL_SERVER>/postgres"
 #
 # Swap out the URI below with the URI for the database created in part 2
-DATABASEURI = "sqlite:///bsl2127:28fah@104.196.175.120"
+DATABASEURI = "postgresql://bsl2127:28fah@104.196.175.120/postgres"
 
 
 #
@@ -47,30 +50,6 @@ DATABASEURI = "sqlite:///bsl2127:28fah@104.196.175.120"
 engine = create_engine(DATABASEURI)
 
 
-#
-# START SQLITE SETUP CODE
-#
-# after these statements run, you should see a file test.db in your webserver/ directory
-# this is a sqlite database that you can query like psql typing in the shell command line:
-#
-#     sqlite3 test.db
-#
-# The following sqlite3 commands may be useful:
-#
-#     .tables               -- will list the tables in the database
-#     .schema <tablename>   -- print CREATE TABLE statement for table
-#
-# The setup code should be deleted once you switch to using the Part 2 postgresql database
-#
-engine.execute("""DROP TABLE IF EXISTS test;""")
-engine.execute("""CREATE TABLE IF NOT EXISTS test (
-  id serial,
-  name text
-);""")
-engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
-#
-# END SQLITE SETUP CODE
-#
 
 
 
@@ -89,6 +68,8 @@ def before_request():
     print "uh oh, problem connecting to database"
     import traceback; traceback.print_exc()
     g.conn = None
+
+
 
 @app.teardown_request
 def teardown_request(exception):
@@ -134,11 +115,11 @@ def index():
   #
   # example of a database query
   #
-  cursor = g.conn.execute("SELECT name FROM test")
-  names = []
-  for result in cursor:
-    names.append(result['name'])  # can also be accessed using result[0]
-  cursor.close()
+  #cursor = g.conn.execute("SELECT name FROM test")
+  #names = []
+  #for result in cursor:
+    #names.append(result['name'])  # can also be accessed using result[0]
+  #cursor.close()
 
   #
   # Flask uses Jinja templates, which is an extension to HTML where you can
@@ -166,14 +147,15 @@ def index():
   #     <div>{{n}}</div>
   #     {% endfor %}
   #
-  context = dict(data = names)
+  #context = dict(data = names)
 
 
   #
   # render_template looks in the templates/ folder for files.
   # for example, the below file reads template/index.html
   #
-  return render_template("index.html", **context)
+  #return render_template("index.html", **context)
+  return render_template("index.html")
 
 #
 # This is an example of a different path.  You can see it at
@@ -183,9 +165,15 @@ def index():
 # notice that the functio name is another() rather than index()
 # the functions for each app.route needs to have different names
 #
-@app.route('/another')
-def another():
-  return render_template("anotherfile.html")
+
+
+@app.route('/foodie')
+def foodie():
+  return render_template("foodie.html")
+
+@app.route('/foodCritic')
+def foodCritic():
+  return render_template("foodCritic.html")
 
 
 # Example of adding new data to the database
@@ -198,10 +186,23 @@ def add():
   return redirect('/')
 
 
-@app.route('/login')
+
+@app.route('/login', methods=['GET', 'POST'])
 def login():
-    abort(401)
-    this_is_never_executed()
+  if request.method == "POST":
+    uname = request.form['username']
+    print(uname)
+    queryStr = 'SELECT EXISTS (SELECT uid FROM users WHERE uid=:u)'
+    cursor = g.conn.execute(text(queryStr),u = uname)
+    for r in cursor:
+      existing_user = r[0]
+      break
+    if existing_user:
+      print("redirect")
+      return redirect('/')
+  return render_template("login.html")
+
+
 
 
 if __name__ == "__main__":
@@ -211,7 +212,7 @@ if __name__ == "__main__":
   @click.option('--debug', is_flag=True)
   @click.option('--threaded', is_flag=True)
   @click.argument('HOST', default='0.0.0.0')
-  @click.argument('PORT', default=8111, type=int)
+  @click.argument('PORT', default=8112, type=int)
   def run(debug, threaded, host, port):
     """
     This function handles command line parameters.

@@ -1,27 +1,68 @@
 <html>
-  <style>
-    body{ 
-      font-size: 15pt;
-      font-family: arial;
-    }
-  </style>
+<head>
+	<title>Homepage</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+
+	<link href="http://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+	<link href="http://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+
+	<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.0.js"></script>
+
+	<link rel="stylesheet" type="text/css" media="all" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">
+	<style>
+		.container-fluid {
+			padding: 80px 120px;
+		}
+
+
+	</style>
+</head>
+
 
 
 <body>
-  <h1>Some famous Computer Scientists</h1>
-  <div>{{data}}</div>
+	<div class="container-fluid">
+		<div class="row">
+			<div class="col-md-6 foodie">
+				<a href="/foodie" id = "accordion1" class= "collapse-NA" >
 
-  <div>
-    {% for n in data %}
-    <div>{{n}}</div>
-    {% endfor %}
-  </div>
+					<img src="{{ url_for('static', filename='fork.jpg') }}" class="img-responsive" alt="fork">
+				</a>
 
-<p><a href="/another">Go to the other page</a></p>
+				<div class="accordion-inner">
+					<h1 class="text-center">FOODIE</h1>
+				</div>
 
-<form method="POST" action="/add">
-<p>Name of new computer scientist: <input type="text" name="name"> <input type="submit" value="Add"></p>
-</form>
+			</div>
+			<div class="col-md-6 foodCritic">
+				<a href ="foodCritic">
+					<img src="{{ url_for('static', filename='pen.jpg') }}" class="img-responsive" alt="pen">
+				</a>
+
+				<div class="accordion-inner">
+					<h1 class="text-center">FOOD CRITIC</h1>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<script type="text/javascript">
+
+		$(".foodie > div").hide().parent().hover(function(event) {
+			$(this).children("div").slideToggle(event.type === "mouseenter");
+		});
+
+		$(".foodCritic > div").hide().parent().hover(function(event) {
+			$(this).children("div").slideToggle(event.type === "mouseenter");
+		});
+
+
+	</script>
+
 
 </body>
 
