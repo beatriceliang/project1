@@ -51,6 +51,31 @@ engine = create_engine(DATABASEURI)
 
 
 
+#
+# START SQLITE SETUP CODE
+#
+# after these statements run, you should see a file test.db in your webserver/ directory
+# this is a sqlite database that you can query like psql typing in the shell command line:
+#
+#     sqlite3 test.db
+#
+# The following sqlite3 commands may be useful:
+#
+#     .tables               -- will list the tables in the database
+#     .schema <tablename>   -- print CREATE TABLE statement for table
+#
+# The setup code should be deleted once you switch to using the Part 2 postgresql database
+#
+# engine.execute("""DROP TABLE IF EXISTS test;""")
+# engine.execute("""CREATE TABLE IF NOT EXISTS test (
+#   id serial,
+#   name text
+# );""")
+# engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
+# #
+# END SQLITE SETUP CODE
+#
+
 
 
 @app.before_request
@@ -121,6 +146,7 @@ def index():
     #names.append(result['name'])  # can also be accessed using result[0]
   #cursor.close()
 
+
   #
   # Flask uses Jinja templates, which is an extension to HTML where you can
   # pass data to a template and dynamically generate HTML based on the data
@@ -156,6 +182,7 @@ def index():
   #
   #return render_template("index.html", **context)
   return render_template("index.html")
+
 
 #
 # This is an example of a different path.  You can see it at
@@ -203,6 +230,257 @@ def login():
   return render_template("login.html")
 
 
+
+################### MY FUNCTIONS ########################
+@app.route('/categories')
+def categories():
+    cursor = g.conn.execute("SELECT DISTINCT neighborhood FROM restaurant_is_at")
+    #cursor = g.conn.execute("SELECT name FROM test")
+    neighborhoods = []
+    for result in cursor:
+        neighborhoods.append(result['neighborhood'])  # can also be accessed using result[0]
+    cursor.close()
+
+    cursor = g.conn.execute("SELECT DISTINCT cuisine FROM restaurant_description")
+    cuisines = []
+    for result in cursor:
+        cuisines.append(result['cuisine'])
+    cursor.close()
+    context = dict(neighborhoods = neighborhoods, cuisines = cuisines)
+
+
+    #context  = dict(neighborhood = neighborhood, restaurants = restaurants);
+
+
+    return render_template("categories.html",**context)
+
+@app.route('/nearby', methods=['POST'])
+def nearby():
+    neighborhood = request.form["neighbor"]
+    cmd = 'SELECT name, restaurant.rid AS rid\
+            FROM restaurant, restaurant_is_at\
+            WHERE restaurant_is_at.rid = restaurant.rid\
+            AND neighborhood = (:x)'
+    cursor = g.conn.execute(text(cmd), x = neighborhood)
+    restaurants = []
+    rid = []
+    for result in cursor:
+        restaurants.append(result['name'])
+        rid.append(result['rid'])
+
+    context  = dict(type = neighborhood, restaurants = zip(restaurants, rid));
+    return render_template("restaurants.html", **context)
+
+@app.route('/pricerange', methods=['POST'])
+def pricerange():
+    price = request.form["price"]
+    cmd = 'SELECT name, restaurant.rid AS rid\
+            FROM restaurant, restaurant_description\
+            WHERE restaurant_description.rid = restaurant.rid\
+            AND price = (:p)'
+    cursor = g.conn.execute(text(cmd), p = price)
+
+    restaurants = []
+    rid = []
+    for result in cursor:
+        restaurants.append(result['name'])
+        rid.append(result['rid'])
+
+    pricerange = ""
+    for i in range(int(price)):
+        pricerange+="$"
+
+    context  = dict(type = pricerange, restaurants = zip(restaurants, rid));
+
+    return render_template("restaurants.html", **context)
+
+@app.route('/cuisines', methods=['POST'])
+def cuisines():
+    cuisine = request.form["cuisine"]
+    cmd = 'SELECT name, restaurant.rid AS rid\
+            FROM restaurant, restaurant_description\
+            WHERE restaurant_description.rid = restaurant.rid\
+            AND cuisine = (:c)'
+    cursor = g.conn.execute(text(cmd), c = cuisine)
+    restaurants = []
+    rid = []
+    for result in cursor:
+        restaurants.append(result['name'])
+        rid.append(result['rid'])
+
+    context  = dict(type = cuisine, restaurants = zip(restaurants, rid));
+    return render_template("restaurants.html", **context)
+
+@app.route('/restaurant', methods=['POST'])
+def restaurant():
+    rid = request.form["rid"]
+
+    cmd = 'SELECT\
+            CAST(SUM(CASE WHEN like_dislike THEN 1 ELSE 0 END) AS FLOAT)/COUNT(like_dislike) \
+            AS liked\
+        FROM rates, reviews\
+        WHERE rates.rid = (:r)\
+        AND rates.review_id = reviews.review_id'
+    cursor = g.conn.execute(text(cmd), r = rid)
+    for result in cursor:
+        liked = result['liked']
+        print liked
+        if liked is not None:
+            liked*=100
+
+    cmd = 'SELECT\
+            CAST(SUM(rating) AS FLOAT)/COUNT(rating) \
+            AS rate\
+        FROM reports, write_about\
+        WHERE write_about.rid = (:r)\
+        AND reports.report_id = write_about.report_id'
+    cursor = g.conn.execute(text(cmd), r = rid)
+    for result in cursor:
+        rate = result['rate']
+
+    cmd = 'SELECT name, contact, cuisine, price, neighborhood, zipcode\
+            FROM restaurant, restaurant_description, restaurant_is_at\
+            WHERE restaurant.rid =(:r)\
+            AND restaurant_description.rid = restaurant.rid\
+            AND restaurant_is_at.rid = restaurant.rid'
+
+    cursor = g.conn.execute(text(cmd), r = rid)
+    for result in cursor:
+        name = result['name']
+        contact = result['contact']
+        cuisine = result['cuisine']
+        price = int(result['price'])
+        neighborhood = result['neighborhood']
+        zipcode = result['zipcode']
+
+    pricerange = ""
+    for i in range(price):
+        pricerange+="$"
+
+
+    cmd = 'SELECT foodie_id, review_id\
+            FROM rates\
+            WHERE rid = (:r)'
+    cursor = g.conn.execute(text(cmd), r = rid)
+
+    foodies =[]
+    review = []
+    for result in cursor:
+        foodies.append(result['foodie_id'])
+        review.append(result['review_id'])
+
+
+    cmd = 'SELECT uid, report_id\
+            FROM write_about\
+            WHERE rid = (:r)'
+    cursor = g.conn.execute(text(cmd), r = rid)
+
+    critic =[]
+    report = []
+    for result in cursor:
+        critic.append(result['uid'])
+        report.append(result['report_id'])
+
+    context = dict(liked = liked, rate = rate, name = name, contact = contact,
+                cuisine = cuisine, price = pricerange, neighborhood = neighborhood,
+                zipcode = zipcode,
+                foodies = zip(foodies, review),
+                critic = zip(critic, report)
+                )
+    return render_template("restaurant.html", **context)
+
+@app.route('/foodie_review', methods=['POST'])
+def foodie_review():
+    review_id = request.form["review"]
+    cmd = 'SELECT like_dislike, content FROM reviews WHERE review_id = (:r)'
+    cursor = g.conn.execute(text(cmd), r = review_id)
+    for result in cursor:
+        like_dislike = result['like_dislike']
+        content = result['content']
+
+    like = u'\U00002639'
+    if like_dislike:
+        like = u'\U0001f604'
+    context = dict(like = like, content = content)
+    return render_template("foodie_review.html",**context)
+
+@app.route('/critic_report', methods=['POST'])
+def critic_report():
+    report_id = request.form["report"]
+    cmd = 'SELECT rating, content FROM reports WHERE report_id = (:r)'
+    cursor = g.conn.execute(text(cmd), r = report_id)
+
+    for result in cursor:
+        rating = result['rating']
+        content = result['content']
+
+    cmd = 'SELECT name, uid, restaurant.rid AS rid\
+            FROM write_about, restaurant\
+            WHERE write_about.report_id = (:r) \
+            AND restaurant.rid = write_about.rid'
+    cursor = g.conn.execute(text(cmd), r = report_id)
+    for result in cursor:
+        name = result['name']
+        uid = result['uid']
+        rid = result['rid']
+
+    context = dict(rating = rating, content = content, name = name, uid= uid, rid = rid)
+    return render_template("critic_report.html",**context)
+
+@app.route('/critic_profile', methods=['POST'])
+def critic_profile():
+    uid = request.form["uid"]
+    cmd = 'SELECT CAST(SUM(CASE WHEN like_dislike THEN 1 ELSE 0 END) AS FLOAT)/COUNT(like_dislike)\
+            AS percent\
+            FROM foodies_assess_critic\
+            WHERE critic_id = (:u)'
+    cursor = g.conn.execute(text(cmd), u = uid)
+    for result in cursor:
+        liked = result['percent']
+        if liked is not None:
+            liked *=100
+    cmd = 'SELECT foodie_id\
+            FROM foodies_assess_critic\
+            WHERE critic_id = (:u)'
+    cursor = g.conn.execute(text(cmd), u = uid)
+    foodie_id = []
+    for result in cursor:
+        foodie_id.append(result['foodie_id'])
+
+    cmd = 'SELECT report_id, name\
+            FROM write_about, restaurant\
+            WHERE write_about.rid = restaurant.rid\
+            AND uid =(:u)'
+    cursor = g.conn.execute(text(cmd), u = uid)
+    restaurant = []
+    report_id = []
+    for result in cursor:
+        restaurant.append(result['name'])
+        report_id.append(result['report_id'])
+
+    context = dict(critic_id = uid, foodie_id = foodie_id, restaurant = zip(restaurant,report_id), liked = liked)
+    return render_template("critic_profile.html",**context)
+
+@app.route('/foodie_review_critic', methods=['POST'])
+def foodie_review_critic():
+    ids = request.form["review"]
+    ids = ids.split(",")
+    critic_id = ids[0]
+    foodie_id = ids[1]
+    cmd = 'SELECT like_dislike, content\
+            FROM foodies_assess_critic \
+            WHERE foodie_id = (:f) AND critic_id = (:c)'
+
+    cursor = g.conn.execute(text(cmd), f = foodie_id, c = critic_id)
+    for result in cursor:
+        like_dislike = result['like_dislike']
+        content = result['content']
+
+    like = u'\U00002639'
+    if like_dislike:
+        like = u'\U0001f604'
+    context = dict(like = like, content = content)
+    return render_template("foodie_review.html",**context)
 
 
 if __name__ == "__main__":
