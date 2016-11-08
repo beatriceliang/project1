@@ -102,10 +102,8 @@ def is_foodie(uname):
   for r in cursor:
       identity = r[0]
       break
-  if identity:
-    return True
-  else:
-    return False
+  return identity
+
 
 @app.teardown_request
 def teardown_request(exception):
@@ -122,10 +120,12 @@ def teardown_request(exception):
 @app.route('/')
 def index():
   if 'username' in session:
-    if is_foodie(session.get('username')):
-      return redirect(url_for('foodie'))
-    elif is_foodie(session.get('username')):
-      return redirect(url_for('foodCritic'))
+    context = dict(is_foodie = is_foodie(session.get('username')))
+    return render_template("landing.html",**context)
+    # if is_foodie(session.get('username')):
+    #   return redirect(url_for('foodie'))
+    # elif is_foodie(session.get('username')):
+    #   return redirect(url_for('foodCritic'))
   else:
     return redirect('login')
 
@@ -275,7 +275,7 @@ def categories():
 
     return render_template("categories.html",**context)
 
-@app.route('/nearby', methods=['GET'])
+@app.route('/nearby', methods=['POST'])
 def nearby():
     neighborhood = request.form["neighbor"]
     cmd = 'SELECT name, restaurant.rid AS rid\
@@ -288,7 +288,6 @@ def nearby():
     for result in cursor:
         restaurants.append(result['name'])
         rid.append(result['rid'])
-
     context  = dict(type = neighborhood, restaurants = zip(restaurants, rid));
     return render_template("restaurants.html", **context)
 
@@ -333,9 +332,33 @@ def cuisines():
     return render_template("restaurants.html", **context)
 
 @app.route('/restaurant', methods=['POST'])
-def restaurant():
-    rid = request.form["rid"]
+def restaurant(rid = None):
+    if rid is None:
+        rid = request.form["rid"]
 
+    isFoodie = None
+    uid = None
+    content = None
+    # get review for restaurant if user has reviewed the restaurant
+    if 'username' in session:
+        uid = session.get('username')
+        isFoodie = is_foodie(uid)
+        if isFoodie:
+            cmd = 'SELECT content \
+                    FROM reviews, rates\
+                    WHERE rid = :r AND foodie_id = :f AND reviews.review_id = rates.review_id'
+            cursor = g.conn.execute(text(cmd), r = rid, f = uid)
+            for result in cursor:
+                content = result["content"]
+        else:
+            cmd = 'SELECT content \
+                    FROM write_about, reports\
+                    WHERE rid = :r AND uid = :u AND reports.report_id = write_about.report_id'
+            cursor = g.conn.execute(text(cmd), r = rid, u = uid)
+            for result in cursor:
+                content = result["content"]
+    print content
+    # get percent of foodies who liked this restaurant
     cmd = 'SELECT\
             CAST(SUM(CASE WHEN like_dislike THEN 1 ELSE 0 END) AS FLOAT)/COUNT(like_dislike) \
             AS liked\
@@ -345,7 +368,6 @@ def restaurant():
     cursor = g.conn.execute(text(cmd), r = rid)
     for result in cursor:
         liked = result['liked']
-        print liked
         if liked is not None:
             liked*=100
 
@@ -406,7 +428,10 @@ def restaurant():
                 cuisine = cuisine, price = pricerange, neighborhood = neighborhood,
                 zipcode = zipcode,
                 foodies = zip(foodies, review),
-                critic = zip(critic, report)
+                critic = zip(critic, report),
+                review = review,
+                isFoodie = isFoodie, rid = rid,
+                content = content
                 )
     return render_template("restaurant.html", **context)
 
@@ -505,15 +530,56 @@ def foodie_review_critic():
 
 @app.route('/landing', methods=['POST'])
 def landing():
-    print request.form
     uid = request.form["uid"]
     cmd = 'SELECT is_foodie FROM users WHERE uid = (:u)'
     cursor = g.conn.execute(text(cmd), u = uid)
     for result in cursor:
         is_foodie = result["is_foodie"]
     context = dict(is_foodie = is_foodie)
-    print is_foodie
     return render_template("landing.html", **context)
+
+@app.route('/make_review/<rid>', methods = ['POST'])
+def make_review(rid):
+    foodie_id = session.get('username')
+    like_dislike = request.form["like_dislike"]
+    like = like_dislike == 'like'
+    content = request.form["content"]
+    cmd = "SELECT review_id FROM rates WHERE rid = :r AND foodie_id = :f"
+    cursor = g.conn.execute(text(cmd),r = rid, f = foodie_id)
+    review_id = None
+    for result in cursor:
+        review_id = result['review_id']
+    if review_id is None:
+        review_id = hash(foodie_id+rid)
+        cmd = "INSERT INTO reviews VALUES(:i, :c,:l)"
+        cursor = g.conn.execute(text(cmd),  i = review_id, c = content, l = like )
+        cmd = "INSERT INTO rates VALUES(:i,:r, :f)"
+        cursor = g.conn.execute(text(cmd), i = review_id, r = rid, f = foodie_id)
+    else:
+        cmd = "UPDATE reviews SET content = :c, like_dislike = :l WHERE review_id = :i"
+        cursor = g.conn.execute(text(cmd), c = content, l = like, i = review_id)
+    return restaurant(rid)
+
+@app.route('/make_report/<rid>', methods = ['POST'])
+def make_report(rid):
+    uid = session.get('username')
+    rating = request.form["rating"]
+    content = request.form["content"]
+    cmd = "SELECT report_id FROM write_about WHERE rid = :r AND uid = :u"
+    cursor = g.conn.execute(text(cmd),r = rid, u = uid)
+    report_id = None
+    for result in cursor:
+        report_id = result['report_id']
+    if report_id is None:
+        report_id = hash(uid+rid)
+        cmd = "INSERT INTO reports VALUES(:i, :c,:r)"
+        cursor = g.conn.execute(text(cmd),  i = report_id, c = content, r = rating )
+        cmd = "INSERT INTO write_about VALUES(:i, :u,:r)"
+        cursor = g.conn.execute(text(cmd), i = report_id, r = rid, u = uid)
+    else:
+        cmd = "UPDATE reports SET content = :c, rating = :r WHERE report_id = :i"
+        cursor = g.conn.execute(text(cmd), c = content, r = rating, i = report_id)
+    return restaurant(rid)
 
 if __name__ == "__main__":
   import click
