@@ -24,27 +24,27 @@
 
 
 
-<body>
+<body background="{{ url_for('static', filename='RegisterBG.jpg') }}">
 	<div class="container-fluid">
 		<div class="row">
 			<div class="col-md-6 foodie">
-				<a href="/foodie" id = "accordion1" class= "collapse-NA" >
+				<a href="/foodieRegister" id = "accordion1" class= "collapse-NA" >
 
-					<img src="{{ url_for('static', filename='fork.jpg') }}" class="img-responsive" alt="fork">
+					<img src="{{ url_for('static', filename='forkLogo.png') }}" class="img-responsive" alt="fork">
 				</a>
 
 				<div class="accordion-inner">
-					<h1 class="text-center">FOODIE</h1>
+					<h1 class="text-center" style="color:white;">FOODIE</h1>
 				</div>
 
 			</div>
 			<div class="col-md-6 foodCritic">
-				<a href ="foodCritic">
-					<img src="{{ url_for('static', filename='pen.jpg') }}" class="img-responsive" alt="pen">
+				<a href ="/foodCriticRegister">
+					<img src="{{ url_for('static', filename='penLogo.png') }}" class="img-responsive" alt="pen">
 				</a>
 
 				<div class="accordion-inner">
-					<h1 class="text-center">FOOD CRITIC</h1>
+					<h1 class="text-center" style="color:white;">FOOD CRITIC</h1>
 				</div>
 			</div>
 		</div>

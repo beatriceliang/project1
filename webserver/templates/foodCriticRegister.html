@@ -1,0 +1,57 @@
+<html>
+
+<head>
+	<title>Food Critic Register</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+
+
+	<link href="http://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+	<link href="http://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+
+	<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.0.js"></script>
+
+	<link rel="stylesheet" type="text/css" media="all" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">
+	<style>
+		.container-fluid {
+			padding: 80px 120px;
+		}
+		.register-form{
+			padding-top: 20px;
+			padding-left: 200px;
+			padding-right: 200px; 
+		}
+		form{
+			background-color: rgba(255,255,255,0.5);
+			padding: 30px;
+		}
+
+
+	</style>
+</head>
+<body background="{{ url_for('static', filename='RegisterBG.jpg') }}">
+	<div class="container">
+		<div class="container-fluid">
+			<h1 class= "text-center" style="color:white;">Registration</h1>
+			<div class="register-form">
+				<form method="POST">
+					<p>Username</p>
+					<input class= "form-control" type="text" name="username" placeholder="Username" required>
+					{% with messages = get_flashed_messages() %}
+					{% if messages %}
+					{% for message in messages %}
+					<p class="text-center" style="color:red;">{{ message }}</p>
+					{% endfor %}
+					{% endif %}
+					{% endwith %}
+					<br>
+					<input class="btn btn-default btn-block btn-primary" type="submit" value="Submit">
+				</form>
+
+			</div>
+		</div>
+	</div>
+
+
+</body>
