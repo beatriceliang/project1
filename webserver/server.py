@@ -359,7 +359,6 @@ def restaurant(rid = None):
             cursor = g.conn.execute(text(cmd), r = rid, u = uid)
             for result in cursor:
                 content = result["content"]
-    print content
     # get percent of foodies who liked this restaurant
     cmd = 'SELECT\
             CAST(SUM(CASE WHEN like_dislike THEN 1 ELSE 0 END) AS FLOAT)/COUNT(like_dislike) \
@@ -476,8 +475,9 @@ def critic_report():
     return render_template("critic_report.html",**context)
 
 @app.route('/critic_profile', methods=['POST'])
-def critic_profile():
-    uid = request.form["uid"]
+def critic_profile(uid = None):
+    if uid is None:
+        uid = request.form["uid"]
     cmd = 'SELECT CAST(SUM(CASE WHEN like_dislike THEN 1 ELSE 0 END) AS FLOAT)/COUNT(like_dislike)\
             AS percent\
             FROM foodies_assess_critic\
@@ -506,7 +506,25 @@ def critic_profile():
         restaurant.append(result['name'])
         report_id.append(result['report_id'])
 
-    context = dict(critic_id = uid, foodie_id = foodie_id, restaurant = zip(restaurant,report_id), liked = liked)
+
+    isFoodie = None
+    foodieId = None
+    content = None
+    # get review for restaurant if user has reviewed the restaurant
+    if 'username' in session:
+        userid = session.get('username')
+        isFoodie = is_foodie(userid)
+        if isFoodie:
+            cmd = 'SELECT content \
+                    FROM foodies_assess_critic\
+                    WHERE critic_id = :c AND foodie_id = :f'
+            cursor = g.conn.execute(text(cmd),c = uid, f = userid)
+            for result in cursor:
+                content = result["content"]
+
+    context = dict(critic_id = uid, foodie_id = foodie_id,
+        restaurant = zip(restaurant,report_id), liked = liked, content = content, isFoodie = isFoodie)
+    print isFoodie
     return render_template("critic_profile.html",**context)
 
 @app.route('/foodie_review_critic', methods=['POST'])
@@ -582,6 +600,105 @@ def make_report(rid):
         cmd = "UPDATE reports SET content = :c, rating = :r WHERE report_id = :i"
         cursor = g.conn.execute(text(cmd), c = content, r = rating, i = report_id)
     return restaurant(rid)
+
+@app.route('/make_critic_review/<critic_id>', methods = ['POST'])
+def make_critic_review(critic_id):
+    foodie_id = session.get('username')
+    like_dislike = request.form["like_dislike"]
+    like = like_dislike == 'like'
+    content = request.form["content"]
+    cmd = "SELECT foodie_id FROM foodies_assess_critic WHERE foodie_id = :f AND critic_id = :c"
+    cursor = g.conn.execute(text(cmd),c = critic_id, f = foodie_id)
+    exists = False
+    for result in cursor:
+        if result['foodie_id'] is not None:
+            exists = True
+    if not exists:
+        review_id = hash(foodie_id+critic_id)
+        cmd = "INSERT INTO foodies_assess_critic VALUES(:f, :cr, :c,:l)"
+        cursor = g.conn.execute(text(cmd),  f = foodie_id, cr = critic_id, c = content, l = like )
+    else:
+        cmd = "UPDATE foodies_assess_critic SET content = :c, like_dislike = :l WHERE foodie_id = :f AND critic_id = :cr"
+        cursor = g.conn.execute(text(cmd), c = content, l = like, f = foodie_id, cr = critic_id)
+    return critic_profile(critic_id)
+
+@app.route("/recommendation", methods = ['POST'])
+def recommendation():
+    uid = session.get('username')
+    cmd = "SELECT cuisine, price FROM foodies_prefer_categories WHERE foodie_id = :u"
+    cursor = g.conn.execute(text(cmd), u = uid)
+    for result in cursor:
+        cuisine = result['cuisine']
+        price = result['price']
+    cmd = "SELECT home,work FROM foodie_set_location WHERE uid = :u"
+    cursor = g.conn.execute(text(cmd), u = uid)
+    for result in cursor:
+        home = result['home']
+        work = result['work']
+    #home
+    cmd = "SELECT restaurant.rid,  restaurant.name\
+            FROM restaurant_is_at, restaurant_description,restaurant\
+            WHERE zipcode = :h AND cuisine = :c AND price = :p\
+            AND restaurant.rid = restaurant_description.rid\
+            AND restaurant.rid = restaurant_is_at.rid"
+    cursor = g.conn.execute(text(cmd), h = home, c = cuisine, p = price)
+    home_rid =[]
+    home_name= []
+    for result in cursor:
+        home_rid.append(result["rid"])
+        home_name.append(result["name"])
+    homeRestaurants = zip(home_rid, home_name)
+
+    #work
+    cmd = "SELECT restaurant.rid,  name\
+            FROM restaurant_is_at, restaurant_description,restaurant\
+            WHERE zipcode = :w AND cuisine = :c AND price = :p\
+            AND restaurant.rid = restaurant_description.rid\
+            AND restaurant.rid = restaurant_is_at.rid"
+    cursor = g.conn.execute(text(cmd), w = work, c = cuisine, p = price)
+    work_rid =[]
+    work_name= []
+    for result in cursor:
+        work_rid.append(result["rid"])
+        work_name.append(result["name"])
+    workRestaurants = zip(work_rid, work_name)
+
+    #near office
+    cmd = "SELECT restaurant.rid, name\
+            FROM restaurant, restaurant_is_at\
+            WHERE restaurant.rid = restaurant_is_at.rid\
+            AND zipcode = :w"
+    cursor = g.conn.execute(text(cmd),  w = work, c = cuisine, p = price)
+    near_work_rid = []
+    near_work_name = []
+    for result in cursor:
+        print result
+        near_work_rid.append(result['rid'])
+        near_work_name.append(result['name'])
+
+    near_work = zip(near_work_rid, near_work_name)
+    #near home
+    cmd = "SELECT restaurant.rid, name\
+            FROM restaurant, restaurant_is_at\
+            WHERE restaurant.rid = restaurant_is_at.rid\
+            AND zipcode = :h"
+    cursor = g.conn.execute(text(cmd),  h = home, c = cuisine, p = price)
+    near_home_rid = []
+    near_home_name = []
+    for result in cursor:
+        print result
+        near_home_rid.append(result['rid'])
+        near_home_name.append(result['name'])
+
+    near_home = zip(near_home_rid, near_home_name)
+    print near_home
+    context = dict(homeRestaurants = homeRestaurants,
+                workRestaurants = workRestaurants,
+                near_work = near_work,
+                near_home = near_home, lenHome = len(homeRestaurants),
+                lenWork = len(workRestaurants), lenNearHome = len(near_home),
+                lenNearWork = len(near_work),foodie_id = uid)
+    return render_template("recommendation.html",**context)
 
 if __name__ == "__main__":
   import click

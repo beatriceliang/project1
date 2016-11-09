@@ -17,7 +17,63 @@
 <body>
   <div class=“container-fluid”>
     <h1> Recommendations for {{foodie_id}} </h1>
-    <form method =  "POST" action = "/recommendation">
+
+
+    {% if lenWork != 0 %}
+    We think you'll like these near Work
+    <form method =  "POST" action = "/restaurant">
+      <select name = "rid">
+        {% for rid,r in workRestaurants%}
+          <option value = "{{rid}}">{{r}} </option>
+        {% endfor %}
+      </select>
+      <input type="submit" value = "submit">
+    </form>
+
+    {% elif lenNearWork !=0 %}
+      No exact preference match near work <br>
+      Try one of these:
+      <form method =  "POST" action = "/restaurant">
+        <select name = "rid">
+          {% for rid,r in near_work%}
+            <option value = "{{rid}}">{{r}} </option>
+          {% endfor %}
+        </select>
+        <input type="submit" value = "submit">
+      </form>
+    {% else %}
+      No restaurants near work
+    {% endif %}
+
+    {% if lenHome != 0 %}
+    We think you'll like these near Home
+    <form method =  "POST" action = "/restaurant">
+      <select name = "rid">
+        {% for rid,r in homeRestaurants%}
+          <option value = "{{rid}}">{{r}} </option>
+        {% endfor %}
+      </select>
+      <input type="submit" value = "submit">
+    </form>
+
+    {% elif lenNearHome != 0 %}
+      No exact preference match near home <br>
+      Try one of these:
+      <form method =  "POST" action = "/restaurant">
+        <select name = "rid">
+          {% for rid,r in near_home%}
+            <option value = "{{rid}}">{{r}} </option>
+          {% endfor %}
+        </select>
+        <input type="submit" value = "submit">
+      </form>
+    {% else %}
+      No restaurants near home
+    {% endif %}
+    <br>
+
+
+
   </div>
 </body>
 </html>
