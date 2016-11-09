@@ -277,13 +277,14 @@ def foodieRegister():
 
     return redirect('/')
 
-@app.route('/foodCriticRegister')
+@app.route('/foodCriticRegister',methods=['POST','GET'])
 def foodCriticRegister():
-  queryStr = 'SELECT cuisine FROM categories'
-  cursor = g.conn.execute(text(queryStr))
+  print("foodCriticRegister function top")
   if request.method == 'GET':
+    print('GET REQUEST')
     return render_template("foodCriticRegister.html")
   if request.method == 'POST':
+    print("POST request")
     uname = request.form['username']
     print(uname)
     queryStr = 'SELECT EXISTS (SELECT uid FROM users WHERE uid=:u)'
@@ -297,6 +298,10 @@ def foodCriticRegister():
       flash("The username already exists...")
       return render_template("foodCriticRegister.html") 
     else:
+      insertUsers = "INSERT INTO users VALUES (:u,false)"
+      cursor = g.conn.execute(text(insertUsers),u=uname)
+      insertFoodCritic = "INSERT INTO food_critic VALUES (:u)"
+      cursor = g.conn.execute(text(insertFoodCritic),u=uname)
       session['username'] = uname
       return redirect('/')
   return redirect('/')
@@ -325,7 +330,6 @@ def login():
       break
     if existing_user:
       session['username'] = request.form['username']
-      flash("You were successfully logged in...")
       print("redirect")
       return redirect('/')
     flash("No matched username. Please register...")
