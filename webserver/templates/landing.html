@@ -21,7 +21,9 @@
       <div><a href="/categories">Check out restaurants</a></div>
 
       {% if is_foodie == True %}
-      <div><a href="/recommendation"> Get a recommendation</a></div>
+        <form method = "POST" action = "/recommendation" >
+          <input type="submit" value = "Get a recommendation">
+        </form>
       {% endif %}
     </div>
   </body>

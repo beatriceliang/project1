@@ -45,6 +45,17 @@
         </select>
         <input type="submit" value = "submit">
       </form>
+
+      {% if  isFoodie == true %}
+        <b>How do you feel about this food critic?</b>
+        <form method = "POST" action = "/make_critic_review/{{critic_id}}">
+          <textarea rows="4" cols="50" name = "content">{% if content is not none %}{{content}}{% endif %}</textarea>
+          <br>
+          <button type="submit" value = "like" name = "like_dislike">like</button>
+          <button type="submit" value = "dislike" name = "like_dislike">dislike</button>
+        </form>
+      {% endif %}
+
     </div>
   </body>
 
