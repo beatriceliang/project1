@@ -47,6 +47,28 @@
       {% else %}
         No critic ratings
       {% endif %}
+      <br>
+      {% if  isFoodie == true %}
+        <b>How do you feel about this restaurant?</b>
+        <form method = "POST" action = "/make_review/{{rid}}">
+          <textarea rows="4" cols="50" name = "content">{% if content is not none %}{{content}}{% endif %}</textarea>
+          <br>
+          <button type="submit" value = "like" name = "like_dislike">like</button>
+          <button type="submit" value = "dislike" name = "like_dislike">dislike</button>
+        </form>
+      {% elif  isFoodie == false %}
+        <b>How do you feel about this restaurant?</b>
+        <form method = "POST" action = "/make_report/{{rid}}">
+          <textarea name = "content" rows="4" cols="50">{% if content is not none %}{{content}}{% endif %}</textarea>
+          <br>
+          <select name = "rating">
+              {% for i in range(1,6) %}
+                <option value= "{{i}}" > {{i}} star(s)</option>
+              {% endfor %}
+          </select>
+          <input type="submit" value = "submit">
+        </form>
+      {% endif %}
     </div>
   </body>
 
