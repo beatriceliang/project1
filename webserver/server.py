@@ -17,6 +17,7 @@ Read about it online.
 
 import os
 from sqlalchemy import *
+from sqlalchemy import exc
 from sqlalchemy.pool import NullPool
 from flask import Flask, request, render_template, g, redirect, Response, session, url_for, flash
 
@@ -123,9 +124,9 @@ def teardown_request(exception):
 def index():
   if 'username' in session:
     if is_foodie(session.get('username')):
-      return redirect(url_for('foodie'))
+      return redirect(url_for('landing'))
     elif is_foodie(session.get('username')):
-      return redirect(url_for('foodCritic'))
+      return redirect(url_for('landing'))
   else:
     return redirect('login')
 
@@ -206,19 +207,103 @@ def register():
   return render_template("register.html")
 
 
-@app.route('/foodie')
-def foodie():
-  if 'username' in session:
-    return render_template("foodie.html")
-  else:
-    return redirect(url_for('login'))
 
-@app.route('/foodCritic')
-def foodCritic():
-  if 'username' in session:
-    return render_template("foodCritic.html")
-  else:
-    return redirect(url_for('login'))
+@app.route('/foodieRegister', methods=['POST','GET'])
+def foodieRegister():
+    queryStr = 'SELECT cuisine FROM categories'
+    cursor = g.conn.execute(text(queryStr))
+    cat = []
+    for r in cursor:
+        cat.append(r[0])
+    context = dict(data = cat)
+    if request.method == 'GET':
+        return render_template("foodieRegister.html",**context)
+    if request.method == 'POST':
+        uname = request.form['username']
+        homeaddr = int(request.form['HomeAddress'])
+        workaddr = int(request.form['WorkAddress'])
+        category = request.form.get('category')
+        price = int(request.form.get('price'))
+        print(uname,homeaddr,workaddr,category,price)
+
+        queryStr = 'SELECT EXISTS (SELECT uid FROM users WHERE uid=:u)'
+        cursor = g.conn.execute(text(queryStr),u = uname)
+        for r in cursor:
+            existing_user = r[0]
+            print(existing_user)
+            break
+
+        if existing_user == True: 
+            flash("The username already exists...")
+            return render_template("foodieRegister.html",**context) 
+
+        print("insert")
+        insertUsers = "INSERT INTO users VALUES (:u,true)"
+        print(g.conn.execute(text(insertUsers),u=uname))
+        insertFoodies = "INSERT INTO foodies VALUES (:u)"
+        cursor = g.conn.execute(text(insertFoodies),u=uname)
+
+        insertLocations = "INSERT INTO locations VALUES (' ',:l)"
+        try:
+            cursor = g.conn.execute(text(insertLocations),l=homeaddr)
+        except exc.IntegrityError:
+            pass
+
+        try:
+            cursor = g.conn.execute(text(insertLocations),l=workaddr)
+        except exc.IntegrityError:
+            pass
+
+        # set location
+
+        insertSetLocation = "INSERT INTO foodie_Set_location VALUES(:u,:l1,:l2);"
+        try:
+            cursor = g.conn.execute(text(insertSetLocation),u=uname,l1=homeaddr,l2=workaddr)
+        except exc.IntegrityError:
+            pass
+
+
+        insertCategories = "INSERT INTO categories VALUES (:c,:p);"
+        try:
+            cursor = g.conn.execute(text(insertCategories),c=category,p=price)
+        except exc.IntegrityError:
+            pass
+
+
+        insertFoodiesPrefer = "INSERT INTO foodies_prefer_categories VALUES (:u,:c,:p);"
+        try:
+            cursor = g.conn.execute(text(insertFoodiesPrefer),u=uname,c=category,p=price)
+        except exc.IntegrityError:
+            pass
+
+        session['username'] = uname
+        return redirect('/')
+
+    return redirect('/')
+
+@app.route('/foodCriticRegister')
+def foodCriticRegister():
+  queryStr = 'SELECT cuisine FROM categories'
+  cursor = g.conn.execute(text(queryStr))
+  if request.method == 'GET':
+    return render_template("foodCriticRegister.html")
+  if request.method == 'POST':
+    uname = request.form['username']
+    print(uname)
+    queryStr = 'SELECT EXISTS (SELECT uid FROM users WHERE uid=:u)'
+    cursor = g.conn.execute(text(queryStr),u = uname)
+    for r in cursor:
+      existing_user = r[0]
+      print(existing_user)
+      break
+
+    if existing_user == True: 
+      flash("The username already exists...")
+      return render_template("foodCriticRegister.html") 
+    else:
+      session['username'] = uname
+      return redirect('/')
+  return redirect('/')
 
 
 # Example of adding new data to the database
