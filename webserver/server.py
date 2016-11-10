@@ -126,80 +126,8 @@ def index():
   else:
     return redirect('login')
 
-
-#
-# @app.route is a decorator around index() that means:
-#   run index() whenever the user tries to access the "/" path using a GET request
-#
-# If you wanted the user to go to e.g., localhost:8111/foobar/ with POST or GET then you could use
-#
-#       @app.route("/foobar/", methods=["POST", "GET"])
-#
-# PROTIP: (the trailing / in the path is important)
-#
-# see for routing: http://flask.pocoo.org/docs/0.10/quickstart/#routing
-# see for decorators: http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/
-#
 @app.route('/register')
 def register():
-  """
-  request is a special object that Flask provides to access web request information:
-
-  request.method:   "GET" or "POST"
-  request.form:     if the browser submitted a form, this contains the data in the form
-  request.args:     dictionary of URL arguments e.g., {a:1, b:2} for http://localhost?a=1&b=2
-
-  See its API: http://flask.pocoo.org/docs/0.10/api/#incoming-request-data
-  """
-
-  # DEBUG: this is debugging code to see what request looks like
-  print request.args
-
-
-  #
-  # example of a database query
-  #
-  #cursor = g.conn.execute("SELECT name FROM test")
-  #names = []
-  #for result in cursor:
-    #names.append(result['name'])  # can also be accessed using result[0]
-  #cursor.close()
-
-
-  #
-  # Flask uses Jinja templates, which is an extension to HTML where you can
-  # pass data to a template and dynamically generate HTML based on the data
-  # (you can think of it as simple PHP)
-  # documentation: https://realpython.com/blog/python/primer-on-jinja-templating/
-  #
-  # You can see an example template in templates/index.html
-  #
-  # context are the variables that are passed to the template.
-  # for example, "data" key in the context variable defined below will be
-  # accessible as a variable in index.html:
-  #
-  #     # will print: [u'grace hopper', u'alan turing', u'ada lovelace']
-  #     <div>{{data}}</div>
-  #
-  #     # creates a <div> tag for each element in data
-  #     # will print:
-  #     #
-  #     #   <div>grace hopper</div>
-  #     #   <div>alan turing</div>
-  #     #   <div>ada lovelace</div>
-  #     #
-  #     {% for n in data %}
-  #     <div>{{n}}</div>
-  #     {% endfor %}
-  #
-  #context = dict(data = names)
-
-
-  #
-  # render_template looks in the templates/ folder for files.
-  # for example, the below file reads template/index.html
-  #
-  #return render_template("index.html", **context)
   return render_template("register.html")
 
 
@@ -229,9 +157,9 @@ def foodieRegister():
             print(existing_user)
             break
 
-        if existing_user == True: 
+        if existing_user == True:
             flash("The username already exists...")
-            return render_template("foodieRegister.html",**context) 
+            return render_template("foodieRegister.html",**context)
 
         print("insert")
         insertUsers = "INSERT INTO users VALUES (:u,true)"
@@ -294,9 +222,9 @@ def foodCriticRegister():
       print(existing_user)
       break
 
-    if existing_user == True: 
+    if existing_user == True:
       flash("The username already exists...")
-      return render_template("foodCriticRegister.html") 
+      return render_template("foodCriticRegister.html")
     else:
       insertUsers = "INSERT INTO users VALUES (:u,false)"
       cursor = g.conn.execute(text(insertUsers),u=uname)
@@ -304,16 +232,6 @@ def foodCriticRegister():
       cursor = g.conn.execute(text(insertFoodCritic),u=uname)
       session['username'] = uname
       return redirect('/')
-  return redirect('/')
-
-
-# Example of adding new data to the database
-@app.route('/add', methods=['POST'])
-def add():
-  name = request.form['name']
-  print name
-  cmd = 'INSERT INTO test(name) VALUES (:name1), (:name2)';
-  g.conn.execute(text(cmd), name1 = name, name2 = name);
   return redirect('/')
 
 
@@ -456,6 +374,7 @@ def restaurant(rid = None):
         liked = result['liked']
         if liked is not None:
             liked*=100
+            liked = round(liked,3)
 
     cmd = 'SELECT\
             CAST(SUM(rating) AS FLOAT)/COUNT(rating) \
@@ -572,6 +491,7 @@ def critic_profile(uid = None):
         liked = result['percent']
         if liked is not None:
             liked *=100
+            liked = round(liked,3)
     cmd = 'SELECT foodie_id\
             FROM foodies_assess_critic\
             WHERE critic_id = (:u)'
@@ -609,7 +529,6 @@ def critic_profile(uid = None):
 
     context = dict(critic_id = uid, foodie_id = foodie_id,
         restaurant = zip(restaurant,report_id), liked = liked, content = content, isFoodie = isFoodie)
-    print isFoodie
     return render_template("critic_profile.html",**context)
 
 @app.route('/foodie_review_critic', methods=['POST'])
@@ -757,7 +676,6 @@ def recommendation():
     near_work_rid = []
     near_work_name = []
     for result in cursor:
-        print result
         near_work_rid.append(result['rid'])
         near_work_name.append(result['name'])
 
@@ -771,12 +689,10 @@ def recommendation():
     near_home_rid = []
     near_home_name = []
     for result in cursor:
-        print result
         near_home_rid.append(result['rid'])
         near_home_name.append(result['name'])
 
     near_home = zip(near_home_rid, near_home_name)
-    print near_home
     context = dict(homeRestaurants = homeRestaurants,
                 workRestaurants = workRestaurants,
                 near_work = near_work,
@@ -792,7 +708,7 @@ if __name__ == "__main__":
   @click.option('--debug', is_flag=True)
   @click.option('--threaded', is_flag=True)
   @click.argument('HOST', default='0.0.0.0')
-  @click.argument('PORT', default=8112, type=int)
+  @click.argument('PORT', default=8111, type=int)
   def run(debug, threaded, host, port):
     """
     This function handles command line parameters.
