@@ -14,66 +14,127 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 </head>
-<body>
+<body background="{{ url_for('static', filename='RegisterBG.jpg') }}"> 
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="collapse navbar-collapse" id="myNavbar">
+        <ul class="nav navbar-nav">
+
+            <li><a href="/">Home</a></li>
+            <li><a href="/categories">Restaurants</a></li>
+            
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+
+              <li>
+                <a>
+                <span class="glyphicon glyphicon-user"></span>
+                <STRONG>{{uname}}</STRONG>
+                </a>
+              </li>
+              <li>
+              <a href="/logout">
+              <span class="glyphicon glyphicon-log-out"></span>
+              Logout
+              </a>
+
+
+        </ul>
+      </div>
+    </div>
+  </nav>
   <div class=“container-fluid”>
-    <h1> Recommendations for {{foodie_id}} </h1>
+    <div class="main-pane">
+      <div class="main-pane-screen">
+        <h1 class="text-center"> Recommendations for {{foodie_id}} </h1>
 
 
-    {% if lenWork != 0 %}
-    We think you'll like these near Work
-    <form method =  "POST" action = "/restaurant">
-      <select name = "rid">
-        {% for rid,r in workRestaurants%}
-          <option value = "{{rid}}">{{r}} </option>
-        {% endfor %}
-      </select>
-      <input type="submit" value = "submit">
-    </form>
+        {% if lenWork != 0 %}
+        <div class="form-width">
+          <div class="form-group">
+            <label>We think you'll like these near Work</label>
+            <form method =  "POST" action = "/restaurant">
+              <select name = "rid">
+                {% for rid,r in workRestaurants%}
+                <option value = "{{rid}}">{{r}} </option>
+                {% endfor %}
+              </select>
+              <input type="submit" value = "submit">
+            </form>
+          </div>
+        </div>
 
-    {% elif lenNearWork !=0 %}
-      No exact preference match near work <br>
-      Try one of these:
-      <form method =  "POST" action = "/restaurant">
-        <select name = "rid">
-          {% for rid,r in near_work%}
-            <option value = "{{rid}}">{{r}} </option>
-          {% endfor %}
-        </select>
-        <input type="submit" value = "submit">
-      </form>
-    {% else %}
-      No restaurants near work
-    {% endif %}
+        {% elif lenNearWork !=0 %}
+        <div class="form-width">
+          <div class="alert alert-warning" role="alert">
+            No exact preference match near work
+          </div>
+          <br>
+          <label>Try one of these:</label>
+          <form method =  "POST" action = "/restaurant">
+            <select name = "rid" class="form-control">
+              {% for rid,r in near_work%}
+              <option value = "{{rid}}">{{r}} </option>
+              {% endfor %}
+            </select>
+            <br>
+            <input type="submit" value = "Check" class="btn btn-default btn-primary btn-block">
+          </form>
+        </div>
+        {% else %}
+        <div class="form-width">
+          <div class="alert alert-warning" role="alert">
+            No restaurants near work
+          </div>
+        </div>
+        {% endif %}
 
-    {% if lenHome != 0 %}
-    We think you'll like these near Home
-    <form method =  "POST" action = "/restaurant">
-      <select name = "rid">
-        {% for rid,r in homeRestaurants%}
-          <option value = "{{rid}}">{{r}} </option>
-        {% endfor %}
-      </select>
-      <input type="submit" value = "submit">
-    </form>
+        {% if lenHome != 0 %}
+        <div class="form-width">
+          <div class="form-group">
+            <label>We think you'll like these near Home</label>
+            <form method =  "POST" action = "/restaurant">
+              <select name = "rid">
+                {% for rid,r in homeRestaurants%}
+                <option value = "{{rid}}">{{r}} </option>
+                {% endfor %}
+              </select>
+              <input type="submit" value = "submit">
+            </form>
 
-    {% elif lenNearHome != 0 %}
-      No exact preference match near home <br>
-      Try one of these:
-      <form method =  "POST" action = "/restaurant">
-        <select name = "rid">
-          {% for rid,r in near_home%}
-            <option value = "{{rid}}">{{r}} </option>
-          {% endfor %}
-        </select>
-        <input type="submit" value = "submit">
-      </form>
-    {% else %}
-      No restaurants near home
-    {% endif %}
-    <br>
+          </div>
+        </div>
+
+        {% elif lenNearHome != 0 %}
+        <div class="form-width">
+          <div class="alert alert-warning" role="alert">
+            No exact preference match near home
+          </div>
+          <label>Try one of these:</label>
 
 
 
+          <form method =  "POST" action = "/restaurant">
+            <select name = "rid" class="form-control">
+              {% for rid,r in near_home%}
+              <option value = "{{rid}}">{{r}} </option>
+              {% endfor %}
+            </select>
+            <br>
+            <input type="submit" value = "Check" class="btn btn-defaut btn-primary btn-block">
+          </form>
+        </div>
+        {% else %}
+        <div class="form-width">
+          <div class="alert alert-warning" role="alert">
+            No restaurants near home
+          </div>
+        </div>
+        {% endif %}
+        <br>
+
+      </div>
+    </div>
   </div>
 </body>
 </html>

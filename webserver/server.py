@@ -121,7 +121,7 @@ def teardown_request(exception):
 @app.route('/')
 def index():
   if 'username' in session:
-    context = dict(is_foodie = is_foodie(session.get('username')))
+    context = dict(is_foodie = is_foodie(session.get('username')),uname=session.get('username'))
     return render_template("landing.html",**context)
   else:
     return redirect('login')
@@ -358,7 +358,7 @@ def categories():
     for result in cursor:
         cuisines.append(result['cuisine'])
     cursor.close()
-    context = dict(neighborhoods = neighborhoods, cuisines = cuisines)
+    context = dict(neighborhoods = neighborhoods, cuisines = cuisines,uname=session.get('username'))
 
     return render_template("categories.html",**context)
 
@@ -375,7 +375,7 @@ def nearby():
     for result in cursor:
         restaurants.append(result['name'])
         rid.append(result['rid'])
-    context  = dict(type = neighborhood, restaurants = zip(restaurants, rid));
+    context  = dict(type = neighborhood, restaurants = zip(restaurants, rid),uname=session.get('username'));
     return render_template("restaurants.html", **context)
 
 @app.route('/pricerange', methods=['POST'])
@@ -397,7 +397,7 @@ def pricerange():
     for i in range(int(price)):
         pricerange+="$"
 
-    context  = dict(type = pricerange, restaurants = zip(restaurants, rid));
+    context  = dict(type = pricerange, restaurants = zip(restaurants, rid),uname=session.get('username'));
 
     return render_template("restaurants.html", **context)
 
@@ -415,7 +415,7 @@ def cuisines():
         restaurants.append(result['name'])
         rid.append(result['rid'])
 
-    context  = dict(type = cuisine, restaurants = zip(restaurants, rid));
+    context  = dict(type = cuisine, restaurants = zip(restaurants, rid),uname=session.get('username'));
     return render_template("restaurants.html", **context)
 
 @app.route('/restaurant', methods=['POST'])
@@ -517,7 +517,8 @@ def restaurant(rid = None):
                 critic = zip(critic, report),
                 review = review,
                 isFoodie = isFoodie, rid = rid,
-                content = content
+                content = content,
+                uname=session.get('username')
                 )
     return render_template("restaurant.html", **context)
 
@@ -533,7 +534,7 @@ def foodie_review():
     like = u'\U00002639'
     if like_dislike:
         like = u'\U0001f604'
-    context = dict(like = like, content = content)
+    context = dict(like = like, content = content,uname=session.get('username'))
     return render_template("foodie_review.html",**context)
 
 @app.route('/critic_report', methods=['POST'])
@@ -556,7 +557,7 @@ def critic_report():
         uid = result['uid']
         rid = result['rid']
 
-    context = dict(rating = rating, content = content, name = name, uid= uid, rid = rid)
+    context = dict(rating = rating, content = content, name = name, uid= uid, rid = rid,uname=session.get('username'))
     return render_template("critic_report.html",**context)
 
 @app.route('/critic_profile', methods=['POST'])
@@ -608,7 +609,7 @@ def critic_profile(uid = None):
                 content = result["content"]
 
     context = dict(critic_id = uid, foodie_id = foodie_id,
-        restaurant = zip(restaurant,report_id), liked = liked, content = content, isFoodie = isFoodie)
+        restaurant = zip(restaurant,report_id), liked = liked, content = content, isFoodie = isFoodie,uname=session.get('username'))
     print isFoodie
     return render_template("critic_profile.html",**context)
 
@@ -630,7 +631,7 @@ def foodie_review_critic():
     like = u'\U00002639'
     if like_dislike:
         like = u'\U0001f604'
-    context = dict(like = like, content = content)
+    context = dict(like = like, content = content,uname=session.get('username'))
     return render_template("foodie_review.html",**context)
 
 @app.route('/landing', methods=['POST'])
@@ -640,7 +641,7 @@ def landing():
     cursor = g.conn.execute(text(cmd), u = uid)
     for result in cursor:
         is_foodie = result["is_foodie"]
-    context = dict(is_foodie = is_foodie)
+    context = dict(is_foodie = is_foodie,uname=session.get('username'))
     return render_template("landing.html", **context)
 
 @app.route('/make_review/<rid>', methods = ['POST'])
@@ -707,8 +708,9 @@ def make_critic_review(critic_id):
         cursor = g.conn.execute(text(cmd), c = content, l = like, f = foodie_id, cr = critic_id)
     return critic_profile(critic_id)
 
-@app.route("/recommendation", methods = ['POST'])
+@app.route("/recommendation", methods = ['POST','GET'])
 def recommendation():
+  if 'username' in session:
     uid = session.get('username')
     cmd = "SELECT cuisine, price FROM foodies_prefer_categories WHERE foodie_id = :u"
     cursor = g.conn.execute(text(cmd), u = uid)
@@ -782,8 +784,10 @@ def recommendation():
                 near_work = near_work,
                 near_home = near_home, lenHome = len(homeRestaurants),
                 lenWork = len(workRestaurants), lenNearHome = len(near_home),
-                lenNearWork = len(near_work),foodie_id = uid)
+                lenNearWork = len(near_work),foodie_id = uid, uname=session.get('username'))
     return render_template("recommendation.html",**context)
+  else:
+    return redirect('/')
 
 if __name__ == "__main__":
   import click

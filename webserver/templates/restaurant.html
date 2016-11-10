@@ -15,6 +15,34 @@
 
 </head>
 <body background="{{ url_for('static', filename='RegisterBG.jpg') }}">
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="collapse navbar-collapse" id="myNavbar">
+        <ul class="nav navbar-nav">
+
+            <li><a href="/">Home</a></li>
+            <li><a href="/categories">Restaurants</a></li>
+            
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+
+              <li>
+                <a>
+                <span class="glyphicon glyphicon-user"></span>
+                <STRONG>{{uname}}</STRONG>
+                </a>
+              </li>
+              <li>
+              <a href="/logout">
+              <span class="glyphicon glyphicon-log-out"></span>
+              Logout
+              </a>
+
+
+        </ul>
+      </div>
+    </div>
+  </nav>
   <div class=“container-fluid”>
     <div class="main-pane">
       <div class="main-pane-screen">
@@ -82,7 +110,10 @@
             <p class="text-center"><b>How do you feel about this restaurant?</b></p>
           </div>
           <form method = "POST" action = "/make_review/{{rid}}">
-            <textarea rows="4" cols="50" name = "content">{% if content is not none %}{{content}}{% endif %}</textarea>
+          <div class="form-group">
+          <label for="review">Review:</label>
+            <textarea name = "content" rows="5" id = "review" class="form-control">{% if content is not none %}{{content}}{% endif %}</textarea>
+            </div>
             <br>
             <button type="submit" value = "like" name = "like_dislike" class= "btn btn-default btn-primary">like</button>
             <button type="submit" value = "dislike" name = "like_dislike" class= "btn btn-default btn-primary">dislike</button>
@@ -91,11 +122,14 @@
         {% elif  isFoodie == false %}
         
         <div class="form-width">
-          <div class="alert alert-info" role="alert">
+          <div class="alert alert-warning" role="alert">
             <p class="text-center"><b>How do you feel about this restaurant?</b></p>
           </div>
           <form method = "POST" action = "/make_report/{{rid}}">
-            <textarea name = "content" rows="4" cols="50">{% if content is not none %}{{content}}{% endif %}</textarea>
+            <div class="form-group">
+            <label for="review">Review:</label>
+            <textarea name = "content" rows="5" id = "review" class="form-control">{% if content is not none %}{{content}}{% endif %}</textarea>
+            </div>
             <br>
             <select name = "rating" class="form-control">
               {% for i in range(1,6) %}

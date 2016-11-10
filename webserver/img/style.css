@@ -1,7 +1,19 @@
+body{
+   min-width:1000px; 
+   width: auto !important; 
+   width:1000px;           
+}
+.logo{
+
+	width:25px;
+	height: 25px;
+}
 .container-fluid {
-	padding: 80px 120px;
+	padding: 80px 120px
 }
 .middle-pane{
+	position: relative;
+	top:80px;
 	background-color: rgba(255,255,255,0.3);
 	padding: 100px;
 	border-radius: 5px;
@@ -96,6 +108,50 @@
 .bs-callout-info h4 {
     color: #5bc0de;
 }
+
+
+
+.nav-tabs li a {
+    color: #777;
+}
+.navbar {
+    font-family: Montserrat, sans-serif;
+    margin-bottom: 0;
+    background-color:rgba(255,255,255,0.8);
+    border: 0;
+    font-size: 11px !important;
+    letter-spacing: 4px;
+    opacity: 0.9;
+}
+
+
+ul.nav a:hover { 
+    background-color: rgba(0,0,0,0.3)!important; 
+}
+.navbar li a, .navbar .navbar-brand { 
+    color: rgb(0,0,0) !important;
+}
+.navbar-nav li a:hover {
+    color: #fff !important;
+}
+.navbar-nav li.active a {
+    color: #fff !important;
+    background-color: rgba(255,255,255,0.8)!important;
+}
+.navbar-default .navbar-toggle {
+    border-color: transparent;
+}
+.open .dropdown-toggle {
+    color: #fff;
+    background-color: #555 !important;
+}
+.dropdown-menu li a {
+    color: #000 !important;
+}
+/*
+.dropdown-menu li a:hover {
+    background-color: rgb(242,72,34)!important;
+}*/
 
 
 

@@ -14,50 +14,100 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 </head>
-  <body>
-    <div class=“container-fluid”>
+<body background="{{ url_for('static', filename='RegisterBG.jpg') }}">
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="collapse navbar-collapse" id="myNavbar">
+        <ul class="nav navbar-nav">
 
-      <h1> {{critic_id}}</h1>
+            <li><a href="/">Home</a></li>
+            <li><a href="/categories">Restaurants</a></li>
+            
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
 
-      {% if liked is not none %}
+              <li>
+                <a>
+                <span class="glyphicon glyphicon-user"></span>
+                <STRONG>{{uname}}</STRONG>
+                </a>
+              </li>
+              <li>
+              <a href="/logout">
+              <span class="glyphicon glyphicon-log-out"></span>
+              Logout
+              </a>
 
-      {{liked}}% of foodies liked this critic <br>
-      <form method = "POST" action = "/foodie_review_critic" >
-        <select name = "review">
-            {% for foodie in foodie_id %}
-              <option value= "{{critic_id}},{{foodie}}" >{{foodie}}</option>
-            {% endfor %}
-        </select>
-        <input type="submit" value = "submit">
-      </form>
 
-      {% else %}
-      No foodie ratings
-      {% endif %}
-
-      <br>
-      Reviews that {{critic_id}} wrote
-      <form method = "POST" action = "/critic_report" >
-        <select name = "report">
-            {% for restaurant,report in restaurant %}
-              <option value= "{{report}}" >{{restaurant}}</option>
-            {% endfor %}
-        </select>
-        <input type="submit" value = "submit">
-      </form>
-
-      {% if  isFoodie == true %}
-        <b>How do you feel about this food critic?</b>
-        <form method = "POST" action = "/make_critic_review/{{critic_id}}">
-          <textarea rows="4" cols="50" name = "content">{% if content is not none %}{{content}}{% endif %}</textarea>
-          <br>
-          <button type="submit" value = "like" name = "like_dislike">like</button>
-          <button type="submit" value = "dislike" name = "like_dislike">dislike</button>
-        </form>
-      {% endif %}
-
+        </ul>
+      </div>
     </div>
-  </body>
+  </nav>
+  <div class=“container-fluid”>
+    <div class="main-pane">
+      <div class="main-pane-screen">
+        <h1 class="text-center"> {{critic_id}}</h1>
+
+        {% if liked is not none %}
+        <div class="form-width">
+          <div class="alert alert-info" role="alert">
+            {{liked}}% of foodies liked this critic <br>
+          </div>
+
+          <form method = "POST" action = "/foodie_review_critic" >
+            <select name = "review" class="form-control">
+              {% for foodie in foodie_id %}
+              <option value= "{{critic_id}},{{foodie}}" >{{foodie}}</option>
+              {% endfor %}
+            </select>
+            <input type="submit" value = "submit" class="btn btn-default btn-primary btn-block">
+          </form>
+        </div>
+
+        {% else %}
+        <div class="form-width">
+          <div class="alert alert-warning" role="alert">
+            No foodie ratings
+          </div>
+        </div>
+        {% endif %}
+
+        <br>
+        <div class="form-width">
+          <div class="form-group">
+            <label>Reviews that {{critic_id}} wrote</label>
+            <form method = "POST" action = "/critic_report" >
+              <select name = "report" class="form-control">
+                {% for restaurant,report in restaurant %}
+                <option value= "{{report}}" >{{restaurant}}</option>
+                {% endfor %}
+              </select>
+              <br>
+              <input type="submit" value = "submit" class="btn btn-default btn-primary btn-block">
+            </form>
+          </div>
+        </div>
+
+        {% if  isFoodie == true %}
+        <div class="form-width">
+          <div class="form-group">
+            <label for="review">How do you feel about this food critic?</label>
+            <form method = "POST" action = "/make_critic_review/{{critic_id}}">
+              <textarea  rows="5" id = "review" class="form-control" name = "content" required>{% if content is not none %}{{content}}
+                {% endif %}
+              </textarea>
+              <br>
+              <button type="submit" value = "like" name = "like_dislike" class="btn btn-default btn-primary ">like</button>
+              <button type="submit" value = "dislike" name = "like_dislike" class="btn btn-default btn-primary ">dislike</button>
+            </form>
+          </div>
+        </div>
+        {% endif %}
+
+      </div>
+    </div>
+  </div>
+</body>
 
 
 </html>

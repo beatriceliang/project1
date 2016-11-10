@@ -15,11 +15,50 @@
 
 </head>
 
-<body>
+<body background="{{ url_for('static', filename='RegisterBG.jpg') }}">
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="collapse navbar-collapse" id="myNavbar">
+        <ul class="nav navbar-nav">
+
+            <li><a href="/">Home</a></li>
+            <li><a href="/categories">Restaurants</a></li>
+            
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+
+              <li>
+                <a>
+                <span class="glyphicon glyphicon-user"></span>
+                <STRONG>{{uname}}</STRONG>
+                </a>
+              </li>
+              <li>
+              <a href="/logout">
+              <span class="glyphicon glyphicon-log-out"></span>
+              Logout
+              </a>
+
+
+        </ul>
+      </div>
+    </div>
+  </nav>
   <div class=“container-fluid”>
-    {{like}} <br>
-    <b> Review </b> <br>
-    {{content}}
+    <div class="middle-pane">
+    <h1 class="text-center">
+            <b> Review</b>
+          </h1>
+      <div class="middle-pane-screen">
+          
+          <p class="text-center">
+          {{like}} 
+          <br>
+          {{content}}
+          </p>
+
+      </div>
+    </div>
   </div>
 </body>
 
