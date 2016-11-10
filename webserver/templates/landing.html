@@ -1,30 +1,42 @@
 <html>
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 
 
-    <link href="http://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
-    <link href="http://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
+  <link href="http://fonts.googleapis.com/css?family=Lato" rel="stylesheet" type="text/css">
+  <link href="http://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
 
-    <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.0.js"></script>
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.0.js"></script>
 
-    <link rel="stylesheet" type="text/css" media="all" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">
-    
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
+  <link rel="stylesheet" type="text/css" media="all" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">
 
-  </head>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
 
-  <body>
-    <div class=“container-fluid”>
-      <div><a href="/categories">Check out restaurants</a></div>
+</head>
 
-      {% if is_foodie == True %}
-        <form method = "POST" action = "/recommendation" >
-          <input type="submit" value = "Get a recommendation">
-        </form>
-      {% endif %}
+<body background="{{ url_for('static', filename='RegisterBG.jpg') }}">
+  <div class="container-fluid">
+    <div class="middle-pane">
+      <div class="middle-pane-screen">
+        <div class="row">
+          <a href="/categories" class="btn btn-default btn-primary btn-block" role="button" >
+            Check out restaurants
+          </a>
+        </div>
+
+        {% if is_foodie == True %}
+        <br>
+        <br>
+        <div class="row">
+          <form method = "POST" action = "/recommendation" >
+            <input type="submit" value = "Get a recommendation" class= "btn btn-default btn-primary btn-block">
+          </form>
+        </div>
+        {% endif %}
+      </div>
     </div>
-  </body>
+  </div>
+</body>
 </html>

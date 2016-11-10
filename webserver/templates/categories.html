@@ -11,47 +11,60 @@
     <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.0.js"></script>
 
     <link rel="stylesheet" type="text/css" media="all" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
   </head>
 
-  <body>
+  <body background="{{ url_for('static', filename='RegisterBG.jpg') }}">
     <div class=“container-fluid”>
-
-        Select a Neighborhood
+        <div class="main-pane">
+        <div class="main-pane-screen">
+        <h1 class="text-center">Select a Neighborhood</h1>
+        <div class="row form-width">
         <form method = "POST" action = "/nearby" >
-          <select name = "neighbor">
+          <select name = "neighbor" class="form-control">
               {% for n in neighborhoods %}
                 <option value= "{{n}}" >{{n}}</option>
               {% endfor %}
           </select>
-          <input type="submit" value = "submit">
+          <br>
+          <input type="submit" value = "submit" class="btn btn-default btn-primary btn-block">
         </form>
+        </div>
 
-        or <br>
+        <h1 class="text-center">or</h1> 
+        <br>
 
-        Select a Price Range
+        <h1 class="text-center">Select a Price Range</h1>
+        <div class="row form-width">
         <form method = "POST" action = "/pricerange" >
-          <select name = "price">
+          <select name = "price" class="form-control">
               <option value=1 >$</option>
               <option value=2 >$$</option>
               <option value=3 >$$$</option>
           </select>
-          <input type="submit" value = "submit">
+          <br>
+          <input type="submit" value = "submit" class="btn btn-default btn-primary btn-block">
         </form>
+        </div>
 
-        or <br>
+        <h1 class="text-center">or</h1> 
+        <br>
 
-        Select a Cuisine
+        <h1 class="text-center">Select a Cuisine</h1>
+        <div class="row form-width">
         <form method = "POST" action = "/cuisines" >
-          <select name = "cuisine">
+          <select name = "cuisine" class="form-control">
               {% for c in cuisines %}
                 <option value= "{{c}}" >{{c}}</option>
               {% endfor %}
           </select>
-          <input type="submit" value = "submit">
+          <br>
+          <input type="submit" value = "submit" class="btn btn-default btn-primary btn-block">
         </form>
-
+        </div>
+    </div>
+    </div>
     </div>
 
   </body>
