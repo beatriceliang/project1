@@ -51,34 +51,6 @@ DATABASEURI = "postgresql://bsl2127:28fah@104.196.175.120/postgres"
 engine = create_engine(DATABASEURI)
 
 
-
-#
-# START SQLITE SETUP CODE
-#
-# after these statements run, you should see a file test.db in your webserver/ directory
-# this is a sqlite database that you can query like psql typing in the shell command line:
-#
-#     sqlite3 test.db
-#
-# The following sqlite3 commands may be useful:
-#
-#     .tables               -- will list the tables in the database
-#     .schema <tablename>   -- print CREATE TABLE statement for table
-#
-# The setup code should be deleted once you switch to using the Part 2 postgresql database
-#
-# engine.execute("""DROP TABLE IF EXISTS test;""")
-# engine.execute("""CREATE TABLE IF NOT EXISTS test (
-#   id serial,
-#   name text
-# );""")
-# engine.execute("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');""")
-# #
-# END SQLITE SETUP CODE
-#
-
-
-
 @app.before_request
 def before_request():
   """
@@ -241,7 +213,6 @@ def foodCriticRegister():
 def login():
   if request.method == "POST":
     uname = request.form['username']
-    print(uname)
     queryStr = 'SELECT EXISTS (SELECT uid FROM users WHERE uid=:u)'
     cursor = g.conn.execute(text(queryStr),u = uname)
     for r in cursor:
@@ -289,7 +260,7 @@ def addRestaurant():
             context = dict(uname=session.get('username'))
             return render_template("addRestaurant.html",**context)
 
-        
+
 
         insertRestaurant = "INSERT INTO restaurant VALUES (:r,:n,:c)"
         cursor = g.conn.execute(text(insertRestaurant),
@@ -748,6 +719,7 @@ def recommendation():
     for result in cursor:
         home = result['home']
         work = result['work']
+
     #home
     cmd = "SELECT restaurant.rid,  restaurant.name\
             FROM restaurant_is_at, restaurant_description,restaurant\
@@ -781,7 +753,7 @@ def recommendation():
             FROM restaurant, restaurant_is_at\
             WHERE restaurant.rid = restaurant_is_at.rid\
             AND zipcode = :w"
-    cursor = g.conn.execute(text(cmd),  w = work, c = cuisine, p = price)
+    cursor = g.conn.execute(text(cmd),  w = work)
     near_work_rid = []
     near_work_name = []
     for result in cursor:
@@ -794,7 +766,7 @@ def recommendation():
             FROM restaurant, restaurant_is_at\
             WHERE restaurant.rid = restaurant_is_at.rid\
             AND zipcode = :h"
-    cursor = g.conn.execute(text(cmd),  h = home, c = cuisine, p = price)
+    cursor = g.conn.execute(text(cmd),  h = home)
     near_home_rid = []
     near_home_name = []
     for result in cursor:
@@ -802,7 +774,27 @@ def recommendation():
         near_home_name.append(result['name'])
 
     near_home = zip(near_home_rid, near_home_name)
-    context = dict(homeRestaurants = homeRestaurants,
+
+
+    #critic recommendation
+    cmd = "SELECT restaurant.rid, restaurant.name\
+            FROM \
+                (foodies_assess_critic INNER JOIN write_about \
+                    ON foodies_assess_critic.critic_id = write_about.uid)\
+                INNER JOIN reports ON reports.report_id = write_about.report_id\
+                INNER JOIN restaurant ON write_about.rid = restaurant.rid\
+            WHERE foodies_assess_critic.like_dislike = true\
+                AND foodies_assess_critic.foodie_id = :f\
+                AND reports.rating > 3"
+    cursor = g.conn.execute(text(cmd), f = uid)
+    critic_rid= []
+    critic_name =[]
+    for result in cursor:
+        critic_rid.append(result['rid'])
+        critic_name.append(result['name'])
+    critic_recommend = zip(critic_rid,critic_name)
+
+    context = dict(critic_recommend = critic_recommend, homeRestaurants = homeRestaurants,
                 workRestaurants = workRestaurants,
                 near_work = near_work,
                 near_home = near_home, lenHome = len(homeRestaurants),

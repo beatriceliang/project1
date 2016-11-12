@@ -15,7 +15,7 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 
 </head>
-<body background="{{ url_for('static', filename='RegisterBG.jpg') }}"> 
+<body background="{{ url_for('static', filename='RegisterBG.jpg') }}">
   <nav class="navbar navbar-default navbar-fixed-top">
     <div class="container">
       <div class="collapse navbar-collapse" id="myNavbar">
@@ -136,7 +136,19 @@
             </div>
           </div>
           {% endif %}
-          <br>
+
+          <div class="form-width">
+            <label>Critics you like suggest:</label>
+            <form method =  "POST" action = "/restaurant">
+              <select name = "rid" class="form-control">
+                {% for rid,r in critic_recommend%}
+                <option value = "{{rid}}">{{r}} </option>
+                {% endfor %}
+              </select>
+              <br>
+              <input type="submit" value = "Check" class="btn btn-defaut btn-primary btn-block">
+            </form>
+          </div>
 
         </div>
       </div>
