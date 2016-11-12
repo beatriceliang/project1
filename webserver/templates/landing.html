@@ -24,7 +24,7 @@
 
             <li><a href="/">Home</a></li>
             <li><a href="/categories">Restaurants</a></li>
-            
+
         </ul>
         <ul class="nav navbar-nav navbar-right">
 
@@ -70,5 +70,23 @@
       </div>
     </div>
   </div>
+
+  Top Foodie Rated Restaurants
+  <form method =  "POST" action = "/restaurant">
+    <select name = "rid">
+      {% for rid,r in topFoodie%}
+      <option value = "{{rid}}">{{r}} </option>
+      {% endfor %}
+    </select>
+    <input type="submit" value = "submit">
+  </form>
+
+  Top Critic Rated Restaurants
+  {% for rid,r in topCritic%}
+  <form method =  "POST" action = "/restaurant">
+    <button type="submit" value = "{{rid}}" name = "rid" class= "btn btn-default btn-transparent">{{r}}</button>
+  </form>
+  {% endfor %}
+
 </body>
 </html>
