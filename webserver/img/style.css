@@ -52,6 +52,15 @@ body{
 	background-color: rgba(255,255,255,0.5);
 }
 
+.recommendation{
+    position: fixed;
+    top:100px;
+    right:50px;
+    padding: 10px;
+    border-radius: 5px;
+
+}
+
 .bs-callout {
     padding: 20px;
     margin: 20px 0;
@@ -73,10 +82,10 @@ body{
     margin-top: -5px;
 }
 .bs-callout-default {
-    border-left-color: #777;
+    border-left-color: rgba(201,189,173,0.8);
 }
 .bs-callout-default h4 {
-    color: #777;
+    color: rgba(201,189,173,0.8);
 }
 .bs-callout-primary {
     border-left-color: #428bca;

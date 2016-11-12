@@ -14,6 +14,16 @@
   <link rel="stylesheet" type="text/css" media="all" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">
 
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css')}}">
+  <style type="text/css">
+    .bs-callout{
+      padding: 0px !important;
+      margin: 3px !important;
+    }
+    .check-button{
+      position: relative;
+      top: 25px;
+    }
+  </style>
 
 </head>
 
@@ -45,35 +55,81 @@
               Logout
             </a>
 
-
           </ul>
         </div>
       </div>
     </nav>
 
-
-
-
     <div class="container-fluid">
-      <div class="middle-pane">
-        <div class="middle-pane-screen">
-          <div class="row">
-            <a href="/categories" class="btn btn-default btn-primary btn-block" role="button" >
-              Check out restaurants
-            </a>
-          </div>
+      <div class="main-pane">
 
-          {% if is_foodie == True %}
-          <br>
-          <br>
-          <div class="row">
+        {% if is_foodie == True %}
+        <div class="main-pane-screen">
+          <div class="form-width recommendation">
             <form method = "POST" action = "/recommendation" >
-              <input type="submit" value = "Get a recommendation" class= "btn btn-default btn-primary btn-block">
+              <label style="color:rgba(255,255,255);"><STRONG>Recommendation</STRONG></label>
+              <br>
+              <button type="submit" class= "btn btn-default btn-info btn-block"><span class="glyphicon glyphicon-zoom-in"></span></button>
             </form>
+            <br>
+            <br>
           </div>
-          {% endif %}
+        </div>
+        {% endif %}
+        <h1 class="text-center">Top Foodie Rated Restaurants</h1>
+        <div class="main-pane-screen">
+
+          {% for rid,name,rate in topFoodie%}
+          <form method =  "POST" action = "/restaurant" class="form-group">
+
+            <div class="bs-callout bs-callout-default restaurant-info">
+              <div class="row">
+                <div class="col-md-8">
+                  <h3>{{name}}</h3>
+                </div>
+                <div class="col-md-4">
+                <button type="submit" value = {{rid}} name = "rid" class="btn btn-default btn-primary check-button"> Check </button>
+                </div>
+              </div>
+              <h5>{{rate}}</h5>
+            </div>
+
+            
+          </form>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div class="main-pane">
+        <h1 class="text-center">Top Critic Rated Restaurants</h1>
+        <div class="main-pane-screen">
+          {% for rid,name,rate in topCritic%}
+          <form method =  "POST" action = "/restaurant" class="form-group">
+            <div class="bs-callout bs-callout-default restaurant-info">
+              <div class="row">
+                <div class="col-md-8">
+                  <h3>{{name}}</h3>
+                </div>
+                <div class="col-md-4">
+                <button type="submit" value = {{rid}} name = "rid" class="btn btn-default btn-primary check-button"> Check </button>
+                </div>
+              </div>
+              <h5>{{rate}}</h5>
+            </div>
+            
+          </form>
+          {% endfor %}
+
+
+          
         </div>
       </div>
     </div>
+
+
+
+
+
   </body>
   </html>
+

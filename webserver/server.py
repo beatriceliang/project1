@@ -121,8 +121,7 @@ def teardown_request(exception):
 @app.route('/')
 def index():
   if 'username' in session:
-    context = dict(is_foodie = is_foodie(session.get('username')),uname=session.get('username'))
-    return render_template("landing.html",**context)
+    return landing()
   else:
     return redirect('login')
 
@@ -599,7 +598,7 @@ def critic_profile(uid = None):
                 content = result["content"]
 
     context = dict(critic_id = uid, foodie_id = foodie_id,
-                  restaurant = zip(restaurant,report_id), liked = liked, 
+                  restaurant = zip(restaurant,report_id), liked = liked,
                   content = content, isFoodie = isFoodie,
                   uname=session.get('username'))
 
@@ -628,12 +627,47 @@ def foodie_review_critic():
 
 @app.route('/landing', methods=['POST'])
 def landing():
-    uid = request.form["uid"]
-    cmd = 'SELECT is_foodie FROM users WHERE uid = (:u)'
-    cursor = g.conn.execute(text(cmd), u = uid)
+    uid=session.get('username')
+    isFoodie = is_foodie(uid)
+    cmd = 'SELECT rates.rid,restaurant.name,\
+            CAST(SUM(CASE WHEN like_dislike THEN 1 ELSE 0 END) AS FLOAT)/COUNT(like_dislike) \
+            AS liked\
+        FROM rates, reviews, restaurant\
+        WHERE rates.review_id = reviews.review_id AND restaurant.rid = rates.rid\
+        GROUP BY rates.rid,restaurant.name\
+        ORDER BY liked DESC\
+        LIMIT 10\
+        '
+    cursor = g.conn.execute(text(cmd))
+
+    f_rid = []
+    f_name = []
+    f_rate = []
     for result in cursor:
-        is_foodie = result["is_foodie"]
-    context = dict(is_foodie = is_foodie,uname=session.get('username'))
+        f_rid.append(result['rid'])
+        f_name.append(result['name'])
+        f_rate.append(str(100*result['liked'])+"%")
+
+    cmd = 'SELECT restaurant.rid, restaurant.name,\
+            CAST(SUM(rating) AS FLOAT)/COUNT(rating) \
+            AS rate\
+        FROM reports, write_about, restaurant\
+        WHERE write_about.rid = restaurant.rid\
+        AND reports.report_id = write_about.report_id\
+        GROUP BY restaurant.rid, restaurant.name\
+        ORDER BY rate DESC\
+        LIMIT 10'
+    cursor = g.conn.execute(text(cmd))
+    c_rid = []
+    c_name= []
+    c_rate = []
+    for result in cursor:
+        c_rid.append(result['rid'])
+        c_name.append(result['name'])
+        c_rate.append(str(result['rate'])+"/5.0")
+
+    context = dict(is_foodie = isFoodie,uname=session.get('username'), topFoodie = zip(f_rid,f_name, f_rate), topCritic = zip(c_rid, c_name, c_rate))
+
     return render_template("landing.html", **context)
 
 @app.route('/make_review/<rid>', methods = ['POST'])
