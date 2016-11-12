@@ -9,6 +9,7 @@
   <link href="http://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
 
   <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.0.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
   <link rel="stylesheet" type="text/css" media="all" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -20,121 +21,125 @@
       <div class="collapse navbar-collapse" id="myNavbar">
         <ul class="nav navbar-nav">
 
-            <li><a href="/">Home</a></li>
-            <li><a href="/categories">Restaurants</a></li>
-            
+          <li><a href="/">Home</a></li>
+          <li><a href="/categories">Restaurants</a></li>
+
         </ul>
         <ul class="nav navbar-nav navbar-right">
 
-              <li>
-                <a>
-                <span class="glyphicon glyphicon-user"></span>
-                <STRONG>{{uname}}</STRONG>
-                </a>
-              </li>
-              <li>
-              <a href="/logout">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              <span class="glyphicon glyphicon-user"></span>
+              <STRONG>{{uname}}</STRONG>
+              <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="/addRestaurant">Add Restaurant</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/logout">
               <span class="glyphicon glyphicon-log-out"></span>
               Logout
-              </a>
+            </a>
 
 
-        </ul>
+          </ul>
+        </div>
       </div>
-    </div>
-  </nav>
-  <div class=“container-fluid”>
-    <div class="main-pane">
-      <div class="main-pane-screen">
-        <h1 class="text-center"> Recommendations for {{foodie_id}} </h1>
+    </nav>
+    <div class=“container-fluid”>
+      <div class="main-pane">
+        <div class="main-pane-screen">
+          <h1 class="text-center"> Recommendations for {{foodie_id}} </h1>
 
 
-        {% if lenWork != 0 %}
-        <div class="form-width">
-          <div class="form-group">
-            <label>We think you'll like these near Work</label>
+          {% if lenWork != 0 %}
+          <div class="form-width">
+            <div class="form-group">
+              <label>We think you'll like these near Work</label>
+              <form method =  "POST" action = "/restaurant">
+                <select name = "rid">
+                  {% for rid,r in workRestaurants%}
+                  <option value = "{{rid}}">{{r}} </option>
+                  {% endfor %}
+                </select>
+                <input type="submit" value = "submit">
+              </form>
+            </div>
+          </div>
+
+          {% elif lenNearWork !=0 %}
+          <div class="form-width">
+            <div class="alert alert-warning" role="alert">
+              No exact preference match near work
+            </div>
+            <br>
+            <label>Try one of these:</label>
             <form method =  "POST" action = "/restaurant">
-              <select name = "rid">
-                {% for rid,r in workRestaurants%}
+              <select name = "rid" class="form-control">
+                {% for rid,r in near_work%}
                 <option value = "{{rid}}">{{r}} </option>
                 {% endfor %}
               </select>
-              <input type="submit" value = "submit">
+              <br>
+              <input type="submit" value = "Check" class="btn btn-default btn-primary btn-block">
             </form>
           </div>
-        </div>
-
-        {% elif lenNearWork !=0 %}
-        <div class="form-width">
-          <div class="alert alert-warning" role="alert">
-            No exact preference match near work
+          {% else %}
+          <div class="form-width">
+            <div class="alert alert-warning" role="alert">
+              No restaurants near work
+            </div>
           </div>
+          {% endif %}
+
+          {% if lenHome != 0 %}
+          <div class="form-width">
+            <div class="form-group">
+              <label>We think you'll like these near Home</label>
+              <form method =  "POST" action = "/restaurant">
+                <select name = "rid">
+                  {% for rid,r in homeRestaurants%}
+                  <option value = "{{rid}}">{{r}} </option>
+                  {% endfor %}
+                </select>
+                <input type="submit" value = "submit">
+              </form>
+
+            </div>
+          </div>
+
+          {% elif lenNearHome != 0 %}
+          <div class="form-width">
+            <div class="alert alert-warning" role="alert">
+              No exact preference match near home
+            </div>
+            <label>Try one of these:</label>
+
+
+
+            <form method =  "POST" action = "/restaurant">
+              <select name = "rid" class="form-control">
+                {% for rid,r in near_home%}
+                <option value = "{{rid}}">{{r}} </option>
+                {% endfor %}
+              </select>
+              <br>
+              <input type="submit" value = "Check" class="btn btn-defaut btn-primary btn-block">
+            </form>
+          </div>
+          {% else %}
+          <div class="form-width">
+            <div class="alert alert-warning" role="alert">
+              No restaurants near home
+            </div>
+          </div>
+          {% endif %}
           <br>
-          <label>Try one of these:</label>
-          <form method =  "POST" action = "/restaurant">
-            <select name = "rid" class="form-control">
-              {% for rid,r in near_work%}
-              <option value = "{{rid}}">{{r}} </option>
-              {% endfor %}
-            </select>
-            <br>
-            <input type="submit" value = "Check" class="btn btn-default btn-primary btn-block">
-          </form>
+
         </div>
-        {% else %}
-        <div class="form-width">
-          <div class="alert alert-warning" role="alert">
-            No restaurants near work
-          </div>
-        </div>
-        {% endif %}
-
-        {% if lenHome != 0 %}
-        <div class="form-width">
-          <div class="form-group">
-            <label>We think you'll like these near Home</label>
-            <form method =  "POST" action = "/restaurant">
-              <select name = "rid">
-                {% for rid,r in homeRestaurants%}
-                <option value = "{{rid}}">{{r}} </option>
-                {% endfor %}
-              </select>
-              <input type="submit" value = "submit">
-            </form>
-
-          </div>
-        </div>
-
-        {% elif lenNearHome != 0 %}
-        <div class="form-width">
-          <div class="alert alert-warning" role="alert">
-            No exact preference match near home
-          </div>
-          <label>Try one of these:</label>
-
-
-
-          <form method =  "POST" action = "/restaurant">
-            <select name = "rid" class="form-control">
-              {% for rid,r in near_home%}
-              <option value = "{{rid}}">{{r}} </option>
-              {% endfor %}
-            </select>
-            <br>
-            <input type="submit" value = "Check" class="btn btn-defaut btn-primary btn-block">
-          </form>
-        </div>
-        {% else %}
-        <div class="form-width">
-          <div class="alert alert-warning" role="alert">
-            No restaurants near home
-          </div>
-        </div>
-        {% endif %}
-        <br>
-
       </div>
     </div>
-  </div>
-</body>
-</html>
+  </body>
+  </html>

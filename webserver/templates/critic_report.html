@@ -9,6 +9,7 @@
   <link href="http://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
 
   <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.0.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
   <link rel="stylesheet" type="text/css" media="all" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
@@ -21,65 +22,69 @@
       <div class="collapse navbar-collapse" id="myNavbar">
         <ul class="nav navbar-nav">
 
-            <li><a href="/">Home</a></li>
-            <li><a href="/categories">Restaurants</a></li>
-            
+          <li><a href="/">Home</a></li>
+          <li><a href="/categories">Restaurants</a></li>
+
         </ul>
         <ul class="nav navbar-nav navbar-right">
 
-              <li>
-                <a>
-                <span class="glyphicon glyphicon-user"></span>
-                <STRONG>{{uname}}</STRONG>
-                </a>
-              </li>
-              <li>
-              <a href="/logout">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              <span class="glyphicon glyphicon-user"></span>
+              <STRONG>{{uname}}</STRONG>
+              <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="/addRestaurant">Add Restaurant</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/logout">
               <span class="glyphicon glyphicon-log-out"></span>
               Logout
-              </a>
+            </a>
 
 
-        </ul>
-      </div>
-    </div>
-  </nav>
-  <div class=“container-fluid”>
-    <div class="main-pane">
-      <div class="main-pane-screen">
-        <div class="form-width">
-        <h1 >Restaurant:</h1>
-          <form method = "POST" action = "/restaurant" >
-            <button type="submit" value = "{{rid}}" name ="rid" class="btn btn-default btn-primary"> {{name}}</button>
-          </form>
-        </div>
-        <div class="form-width">
-        <h1 >Reviews from:</h1>
-          <form method = "POST" action = "/critic_profile" >
-            <input type="submit" value = "{{uid}}" name ="uid" class="btn btn-default btn-primary">
-          </form>
-        </div>
-        <div class="form-width">
-          <div class="alert alert-warning" role="alert">
-            <p class="text-center">
-            {{rating}}/5.0 
-            </p>
-          </div>
-          <br>
-          <h1 class="text-center"> 
-            <b> Review </b>
-          </h1>
-          <br>
-          <div class="alert alert-info" role="alert">
-          <p class="text-center">
-            {{content}}
-          </p>
-          </div>
+          </ul>
         </div>
       </div>
+    </nav>
+    <div class=“container-fluid”>
+      <div class="main-pane">
+        <div class="main-pane-screen">
+          <div class="form-width">
+            <h1 >Restaurant:</h1>
+            <form method = "POST" action = "/restaurant" >
+              <button type="submit" value = "{{rid}}" name ="rid" class="btn btn-default btn-primary"> {{name}}</button>
+            </form>
+          </div>
+          <div class="form-width">
+            <h1 >Reviews from:</h1>
+            <form method = "POST" action = "/critic_profile" >
+              <input type="submit" value = "{{uid}}" name ="uid" class="btn btn-default btn-primary">
+            </form>
+          </div>
+          <div class="form-width">
+            <div class="alert alert-warning" role="alert">
+              <p class="text-center">
+                {{rating}}/5.0 
+              </p>
+            </div>
+            <br>
+            <h1 class="text-center"> 
+              <b> Review </b>
+            </h1>
+            <br>
+            <div class="alert alert-info" role="alert">
+              <p class="text-center">
+                {{content}}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-</body>
+  </body>
 
 
-</html>
+  </html>

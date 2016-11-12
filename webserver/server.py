@@ -128,6 +128,8 @@ def index():
 
 @app.route('/register')
 def register():
+  if 'username' in session:
+    return redirect('/')
   return render_template("register.html")
 
 
@@ -163,7 +165,7 @@ def foodieRegister():
 
         print("insert")
         insertUsers = "INSERT INTO users VALUES (:u,true)"
-        print(g.conn.execute(text(insertUsers),u=uname))
+        cursor = g.conn.execute(text(insertUsers),u=uname)
         insertFoodies = "INSERT INTO foodies VALUES (:u)"
         cursor = g.conn.execute(text(insertFoodies),u=uname)
 
@@ -258,6 +260,74 @@ def login():
 def logout():
     session.pop('username', None)
     return index()
+
+
+@app.route("/addRestaurant", methods=['GET', 'POST'])
+def addRestaurant():
+  if 'username' in session:
+    if request.method == 'GET':
+      context = dict(uname=session.get('username'))
+      return render_template("addRestaurant.html",**context)
+    if request.method == 'POST':
+        restaurantName = request.form['restaurantName']
+        cuisineType = request.form['cuisineType']
+        price = int(request.form.get('price'))
+        neighborhood = request.form['neighborhood']
+        if len(neighborhood) == 0:
+            neighborhood = None
+        zipcode = int(request.form['zipcode'])
+        contact = request.form['contact']
+        contact = int(''.join(c for c in contact if c.isdigit()))
+        rid = int(hash(contact)+hash(restaurantName))
+        queryStr = 'SELECT EXISTS (SELECT rid FROM restaurant WHERE rid=:u)'
+        cursor = g.conn.execute(text(queryStr),u = str(rid))
+        for r in cursor:
+            existing = r[0]
+            break
+
+        if existing == True:
+            flash("The restaurant already exists...")
+            context = dict(uname=session.get('username'))
+            return render_template("addRestaurant.html",**context)
+
+        
+
+        insertRestaurant = "INSERT INTO restaurant VALUES (:r,:n,:c)"
+        cursor = g.conn.execute(text(insertRestaurant),
+                                r=rid,
+                                n=restaurantName,
+                                c=contact)
+
+        insertCategories = "INSERT INTO categories VALUES (:c,:p)"
+        try:
+            cursor = g.conn.execute(text(insertCategories),c=cuisineType, p=price)
+        except exc.IntegrityError:
+            pass
+
+        insertResDesc = "INSERT INTO restaurant_description VALUES (:r,:c,:p)"
+        cursor = g.conn.execute(text(insertResDesc),
+                                r=rid,
+                                c=cuisineType,
+                                p=price)
+
+
+        insertLocations = "INSERT INTO locations VALUES (:n,:z)"
+        try:
+            cursor = g.conn.execute(text(insertLocations),n=neighborhood, z=zipcode)
+        except exc.IntegrityError:
+            pass
+
+        insertResAt = "INSERT INTO restaurant_is_at VALUES (:r,:n,:z)"
+        cursor = g.conn.execute(text(insertResAt),
+                                r=rid,
+                                n=neighborhood,
+                                z=zipcode)
+
+        return redirect(url_for('categories'))
+    return redirect('/')
+
+  else:
+    return redirect('login')
 
 
 

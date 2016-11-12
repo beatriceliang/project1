@@ -9,6 +9,7 @@
   <link href="http://fonts.googleapis.com/css?family=Montserrat" rel="stylesheet" type="text/css">
 
   <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.1.0.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
 
   <link rel="stylesheet" type="text/css" media="all" href="http://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css">
 
@@ -22,53 +23,57 @@
       <div class="collapse navbar-collapse" id="myNavbar">
         <ul class="nav navbar-nav">
 
-            <li><a href="/">Home</a></li>
-            <li><a href="/categories">Restaurants</a></li>
-            
+          <li><a href="/">Home</a></li>
+          <li><a href="/categories">Restaurants</a></li>
+
         </ul>
         <ul class="nav navbar-nav navbar-right">
 
-              <li>
-              	<a>
-              	<span class="glyphicon glyphicon-user"></span>
-              	<STRONG>{{uname}}</STRONG>
-              	</a>
-              </li>
-              <li>
-              <a href="/logout">
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+              <span class="glyphicon glyphicon-user"></span>
+              <STRONG>{{uname}}</STRONG>
+              <span class="caret"></span>
+            </a>
+            <ul class="dropdown-menu">
+              <li><a href="/addRestaurant">Add Restaurant</a></li>
+            </ul>
+          </li>
+          <li>
+            <a href="/logout">
               <span class="glyphicon glyphicon-log-out"></span>
               Logout
-              </a>
+            </a>
 
 
-        </ul>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+
+
+
+    <div class="container-fluid">
+      <div class="middle-pane">
+        <div class="middle-pane-screen">
+          <div class="row">
+            <a href="/categories" class="btn btn-default btn-primary btn-block" role="button" >
+              Check out restaurants
+            </a>
+          </div>
+
+          {% if is_foodie == True %}
+          <br>
+          <br>
+          <div class="row">
+            <form method = "POST" action = "/recommendation" >
+              <input type="submit" value = "Get a recommendation" class= "btn btn-default btn-primary btn-block">
+            </form>
+          </div>
+          {% endif %}
+        </div>
       </div>
     </div>
-  </nav>
-
-
-
-
-  <div class="container-fluid">
-    <div class="middle-pane">
-      <div class="middle-pane-screen">
-        <div class="row">
-          <a href="/categories" class="btn btn-default btn-primary btn-block" role="button" >
-            Check out restaurants
-          </a>
-        </div>
-
-        {% if is_foodie == True %}
-        <br>
-        <br>
-        <div class="row">
-          <form method = "POST" action = "/recommendation" >
-            <input type="submit" value = "Get a recommendation" class= "btn btn-default btn-primary btn-block">
-          </form>
-        </div>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-</body>
-</html>
+  </body>
+  </html>
