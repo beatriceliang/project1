@@ -70,6 +70,7 @@ def before_request():
 
 
 def is_foodie(uname):
+  '''checks if uname is in the foodies table'''
   queryStr = 'SELECT is_foodie FROM users WHERE uid=:u'
   cursor = g.conn.execute(text(queryStr),u = uname)
   for r in cursor:
@@ -107,6 +108,7 @@ def register():
 
 @app.route('/foodieRegister', methods=['POST','GET'])
 def foodieRegister():
+    '''registers foodie'''
     queryStr = 'SELECT cuisine FROM categories'
     cursor = g.conn.execute(text(queryStr))
     cat = []
@@ -301,9 +303,9 @@ def addRestaurant():
 
 
 
-################### MY FUNCTIONS ########################
 @app.route('/categories')
 def categories():
+    '''displays lists of restaurant categories '''
     cursor = g.conn.execute("SELECT DISTINCT neighborhood FROM restaurant_is_at")
 
     neighborhoods = []
@@ -322,6 +324,7 @@ def categories():
 
 @app.route('/nearby', methods=['POST'])
 def nearby():
+    '''gets the restaurants in a neighborhood'''
     neighborhood = request.form["neighbor"]
     cmd = 'SELECT name, restaurant.rid AS rid\
             FROM restaurant, restaurant_is_at\
@@ -338,6 +341,7 @@ def nearby():
 
 @app.route('/pricerange', methods=['POST'])
 def pricerange():
+    '''gets the restaurants in a price range'''
     price = request.form["price"]
     cmd = 'SELECT name, restaurant.rid AS rid\
             FROM restaurant, restaurant_description\
@@ -361,6 +365,7 @@ def pricerange():
 
 @app.route('/cuisines', methods=['POST'])
 def cuisines():
+    ''' gets the restaurants with a specific cuisine'''
     cuisine = request.form["cuisine"]
     cmd = 'SELECT name, restaurant.rid AS rid\
             FROM restaurant, restaurant_description\
@@ -378,6 +383,7 @@ def cuisines():
 
 @app.route('/restaurant', methods=['POST'])
 def restaurant(rid = None):
+    '''gets all of the information for a restaurant'''
     if rid is None:
         rid = request.form["rid"]
 
@@ -415,7 +421,7 @@ def restaurant(rid = None):
         if liked is not None:
             liked*=100
             liked = round(liked,3)
-
+    #get average critic rating of restaurant
     cmd = 'SELECT\
             CAST(SUM(rating) AS FLOAT)/COUNT(rating) \
             AS rate\
@@ -425,7 +431,7 @@ def restaurant(rid = None):
     cursor = g.conn.execute(text(cmd), r = rid)
     for result in cursor:
         rate = result['rate']
-
+    # get all of the vital restaurant information
     cmd = 'SELECT name, contact, cuisine, price, neighborhood, zipcode\
             FROM restaurant, restaurant_description, restaurant_is_at\
             WHERE restaurant.rid =(:r)\
@@ -445,7 +451,7 @@ def restaurant(rid = None):
     for i in range(price):
         pricerange+="$"
 
-
+    #get reviews of restaurant
     cmd = 'SELECT foodie_id, review_id\
             FROM rates\
             WHERE rid = (:r)'
@@ -457,7 +463,7 @@ def restaurant(rid = None):
         foodies.append(result['foodie_id'])
         review.append(result['review_id'])
 
-
+    #get reports of restaurant
     cmd = 'SELECT uid, report_id\
             FROM write_about\
             WHERE rid = (:r)'
@@ -483,6 +489,7 @@ def restaurant(rid = None):
 
 @app.route('/foodie_review', methods=['POST'])
 def foodie_review():
+    '''returns the given review'''
     review_id = request.form["review"]
     cmd = 'SELECT like_dislike, content FROM reviews WHERE review_id = (:r)'
     cursor = g.conn.execute(text(cmd), r = review_id)
@@ -498,6 +505,8 @@ def foodie_review():
 
 @app.route('/critic_report', methods=['POST'])
 def critic_report():
+    '''gets critic reports'''
+    #get the report
     report_id = request.form["report"]
     cmd = 'SELECT rating, content FROM reports WHERE report_id = (:r)'
     cursor = g.conn.execute(text(cmd), r = report_id)
@@ -505,7 +514,7 @@ def critic_report():
     for result in cursor:
         rating = result['rating']
         content = result['content']
-
+    #get user, restaurant name and restaurant id
     cmd = 'SELECT name, uid, restaurant.rid AS rid\
             FROM write_about, restaurant\
             WHERE write_about.report_id = (:r) \
@@ -521,13 +530,16 @@ def critic_report():
 
 @app.route('/critic_profile', methods=['POST'])
 def critic_profile(uid = None):
+    '''gets uid profile'''
     if uid is None:
         uid = request.form["uid"]
+    #get percent of foodies who like this critic
     cmd = 'SELECT CAST(SUM(CASE WHEN like_dislike THEN 1 ELSE 0 END) AS FLOAT)/COUNT(like_dislike)\
             AS percent\
             FROM foodies_assess_critic\
             WHERE critic_id = (:u)'
     cursor = g.conn.execute(text(cmd), u = uid)
+    #get the id of the foodies that rated this critic
     for result in cursor:
         liked = result['percent']
         if liked is not None:
@@ -540,7 +552,7 @@ def critic_profile(uid = None):
     foodie_id = []
     for result in cursor:
         foodie_id.append(result['foodie_id'])
-
+    #get report id for all reviews this critic has made
     cmd = 'SELECT report_id, name\
             FROM write_about, restaurant\
             WHERE write_about.rid = restaurant.rid\
@@ -577,6 +589,7 @@ def critic_profile(uid = None):
 
 @app.route('/foodie_review_critic', methods=['POST'])
 def foodie_review_critic():
+    '''gets the foodie's review of the critic'''
     ids = request.form["review"]
     ids = ids.split(",")
     critic_id = ids[0]
@@ -598,6 +611,8 @@ def foodie_review_critic():
 
 @app.route('/landing', methods=['POST'])
 def landing():
+    '''displays the top rated restaurants'''
+    #get top 10 rated restaurants by foodies
     uid=session.get('username')
     isFoodie = is_foodie(uid)
     cmd = 'SELECT rates.rid,restaurant.name,\
@@ -619,6 +634,7 @@ def landing():
         f_name.append(result['name'])
         f_rate.append(str(100*result['liked'])+"%")
 
+    #get top 10 rated restaurants by critics
     cmd = 'SELECT restaurant.rid, restaurant.name,\
             CAST(SUM(rating) AS FLOAT)/COUNT(rating) \
             AS rate\
@@ -643,6 +659,7 @@ def landing():
 
 @app.route('/make_review/<rid>', methods = ['POST'])
 def make_review(rid):
+    '''inserts foodie's review of restaurant into database'''
     foodie_id = session.get('username')
     like_dislike = request.form["like_dislike"]
     like = like_dislike == 'like'
@@ -665,6 +682,7 @@ def make_review(rid):
 
 @app.route('/make_report/<rid>', methods = ['POST'])
 def make_report(rid):
+    '''inserts critic's report on restaurant into database'''
     uid = session.get('username')
     rating = request.form["rating"]
     content = request.form["content"]
@@ -686,6 +704,7 @@ def make_report(rid):
 
 @app.route('/make_critic_review/<critic_id>', methods = ['POST'])
 def make_critic_review(critic_id):
+    '''inserts foodie's review of critic into database'''
     foodie_id = session.get('username')
     like_dislike = request.form["like_dislike"]
     like = like_dislike == 'like'
@@ -707,20 +726,23 @@ def make_critic_review(critic_id):
 
 @app.route("/recommendation", methods = ['POST','GET'])
 def recommendation():
+  '''gets restaurant recommendations for given foodie'''
   if 'username' in session:
     uid = session.get('username')
+    #get preferences
     cmd = "SELECT cuisine, price FROM foodies_prefer_categories WHERE foodie_id = :u"
     cursor = g.conn.execute(text(cmd), u = uid)
     for result in cursor:
         cuisine = result['cuisine']
         price = result['price']
+    #get locations
     cmd = "SELECT home,work FROM foodie_set_location WHERE uid = :u"
     cursor = g.conn.execute(text(cmd), u = uid)
     for result in cursor:
         home = result['home']
         work = result['work']
 
-    #home
+    #get restaurants that fit preferences near home
     cmd = "SELECT restaurant.rid,  restaurant.name\
             FROM restaurant_is_at, restaurant_description,restaurant\
             WHERE zipcode = :h AND cuisine = :c AND price = :p\
@@ -734,7 +756,7 @@ def recommendation():
         home_name.append(result["name"])
     homeRestaurants = zip(home_rid, home_name)
 
-    #work
+    #get restaurants that fit preferences near work
     cmd = "SELECT restaurant.rid,  name\
             FROM restaurant_is_at, restaurant_description,restaurant\
             WHERE zipcode = :w AND cuisine = :c AND price = :p\
@@ -748,7 +770,7 @@ def recommendation():
         work_name.append(result["name"])
     workRestaurants = zip(work_rid, work_name)
 
-    #near office
+    #get restaurants near office
     cmd = "SELECT restaurant.rid, name\
             FROM restaurant, restaurant_is_at\
             WHERE restaurant.rid = restaurant_is_at.rid\
@@ -761,7 +783,7 @@ def recommendation():
         near_work_name.append(result['name'])
 
     near_work = zip(near_work_rid, near_work_name)
-    #near home
+    #get restaurants near home
     cmd = "SELECT restaurant.rid, name\
             FROM restaurant, restaurant_is_at\
             WHERE restaurant.rid = restaurant_is_at.rid\
@@ -776,7 +798,7 @@ def recommendation():
     near_home = zip(near_home_rid, near_home_name)
 
 
-    #critic recommendation
+    #get restaurants that critics recommend
     cmd = "SELECT restaurant.rid, restaurant.name\
             FROM \
                 (foodies_assess_critic INNER JOIN write_about \
